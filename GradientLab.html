@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gradient Lab · 渐变实验室</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: rgba(255,255,255,0.03);
+    --border: rgba(255,255,255,0.06);
+    --text: #e8e8ed;
+    --text-dim: #8888a0;
+    --accent: #ff6b9d;
+    --accent2: #c44dff;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-x: hidden;
+  }
+
+  /* Ambient background glow */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 30%, rgba(255,107,157,0.08), transparent),
+      radial-gradient(ellipse 60% 80% at 80% 70%, rgba(196,77,255,0.06), transparent);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 780px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  /* ---- Header ---- */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .logo span { font-weight: 300; opacity: 0.6; }
+
+  /* ---- Preview ---- */
+  .preview-wrap {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px var(--border),
+      0 24px 60px rgba(0,0,0,0.5);
+  }
+  .preview {
+    width: 100%;
+    height: 280px;
+    transition: background 0.4s ease;
+    cursor: crosshair;
+    position: relative;
+  }
+  .preview-label {
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    pointer-events: none;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .angle-indicator {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 2px; height: 60px;
+    background: rgba(255,255,255,0.5);
+    transform-origin: bottom center;
+    border-radius: 1px;
+    pointer-events: none;
+    transition: transform 0.1s ease;
+  }
+  .angle-indicator::after {
+    content: '';
+    position: absolute;
+    top: -4px; left: 50%;
+    transform: translateX(-50%);
+    width: 8px; height: 8px;
+    background: white;
+    border-radius: 50%;
+  }
+
+  /* ---- Controls Card ---- */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* ---- Color Stops ---- */
+  .stops-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .stop {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    cursor: grab;
+    transition: transform 0.15s, border-color 0.2s;
+  }
+  .stop:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
+  .stop:active { cursor: grabbing; }
+  .stop-color {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .stop-hex {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+    user-select: none;
+    min-width: 52px;
+  }
+  .stop-remove {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.08);
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .stop-remove:hover { background: rgba(255,80,80,0.3); color: #ff6b6b; }
+  .add-stop {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1.5px dashed rgba(255,255,255,0.15);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .add-stop:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---- Controls Row ---- */
+  .controls-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .control-group label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .type-toggle {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .type-toggle button {
+    padding: 7px 14px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .type-toggle button.active {
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+  }
+  .type-toggle button:hover:not(.active) { background: rgba(255,255,255,0.04); }
+
+  .angle-slider {
+    -webkit-appearance: none;
+    width: 100px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.1);
+    outline: none;
+  }
+  .angle-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--text);
+    cursor: pointer;
+    border: 2px solid var(--bg);
+  }
+  .angle-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+    min-width: 36px;
+    text-align: right;
+  }
+
+  /* ---- Presets ---- */
+  .section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    margin-top: 24px;
+  }
+  .presets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .preset {
+    height: 56px;
+    border-radius: var(--radius-sm);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .preset:hover {
+    transform: scale(1.05);
+    border-color: rgba(255,255,255,0.3);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .preset.active { border-color: white; }
+  .preset-name {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(0,0,0,0.35);
+    color: rgba(255,255,255,0.85);
+    opacity: 0;
+    transition: opacity 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .preset:hover .preset-name { opacity: 1; }
+
+  /* ---- Actions ---- */
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+  .btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    color: white;
+    font-weight: 600;
+  }
+  .btn.primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(255,107,157,0.3);
+  }
+  .btn.primary:active { transform: translateY(0); }
+
+  /* ---- Toast ---- */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(255,255,255,0.95);
+    color: #0a0a0f;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    z-index: 100;
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ---- Hidden color input ---- */
+  .hidden-picker { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+
+  @media (max-width: 600px) {
+    .presets { grid-template-columns: repeat(3, 1fr); }
+    .controls-row { flex-direction: column; align-items: flex-start; }
+    .preview { height: 200px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="logo">Gradient <span>Lab</span></div>
+    <div style="font-size:12px;color:var(--text-dim)">渐变实验室</div>
+  </header>
+
+  <!-- Gradient Preview -->
+  <div class="preview-wrap">
+    <div class="preview" id="preview">
+      <div class="angle-indicator" id="angleIndicator"></div>
+      <div class="preview-label" id="previewLabel">linear-gradient(135deg, ...)</div>
+    </div>
+  </div>
+
+  <!-- Color Stops -->
+  <div class="card">
+    <div class="stops-row" id="stopsRow"></div>
+
+    <div class="controls-row">
+      <div class="control-group">
+        <label>类型</label>
+        <div class="type-toggle">
+          <button class="active" data-type="linear">线性</button>
+          <button data-type="radial">径向</button>
+        </div>
+      </div>
+      <div class="control-group" id="angleGroup">
+        <label>角度</label>
+        <input type="range" class="angle-slider" id="angleSlider" min="0" max="360" value="135">
+        <span class="angle-val" id="angleVal">135°</span>
+      </div>
+    </div>
+
+    <!-- Presets -->
+    <div class="section-title">🎨 灵感预设</div>
+    <div class="presets" id="presets"></div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn" id="btnRandom">🎲 随机生成</button>
+      <button class="btn primary" id="btnCopy">📋 复制 CSS</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="color" class="hidden-picker" id="colorPicker">
+
+<script>
+// ─── State ──────────────────────────────────
+let gradientType = 'linear';
+let angle = 135;
+let colorStops = [
+  { color: '#ff6b9d', pos: 0 },
+  { color: '#c44dff', pos: 100 }
+];
+let activeStopIdx = null;
+const preview = document.getElementById('preview');
+const stopsRow = document.getElementById('stopsRow');
+const angleSlider = document.getElementById('angleSlider');
+const angleVal = document.getElementById('angleVal');
+const angleGroup = document.getElementById('angleGroup');
+const angleIndicator = document.getElementById('angleIndicator');
+const previewLabel = document.getElementById('previewLabel');
+const toast = document.getElementById('toast');
+const colorPicker = document.getElementById('colorPicker');
+
+// ─── Presets ─────────────────────────────────
+const presets = [
+  { name: '日落', stops: [{color:'#ff512f',pos:0},{color:'#f09819',pos:100}] },
+  { name: '海洋', stops: [{color:'#0f2027',pos:0},{color:'#203a43',pos:50},{color:'#2c5364',pos:100}] },
+  { name: '极光', stops: [{color:'#11998e',pos:0},{color:'#38ef7d',pos:100}] },
+  { name: '霓虹', stops: [{color:'#f857a6',pos:0},{color:'#ff5858',pos:100}] },
+  { name: '紫夜', stops: [{color:'#4a00e0',pos:0},{color:'#8e2de2',pos:100}] },
+  { name: '森林', stops: [{color:'#134e5e',pos:0},{color:'#71b280',pos:100}] },
+  { name: '糖果', stops: [{color:'#fc4a1a',pos:0},{color:'#f7b733',pos:100}] },
+  { name: '火红', stops: [{color:'#cb2d3e',pos:0},{color:'#ef473a',pos:100}] },
+];
+
+// ─── Render gradient ──────────────────────────
+function getGradientCSS() {
+  const stopsStr = colorStops
+    .sort((a,b) => a.pos - b.pos)
+    .map(s => `${s.color} ${s.pos}%`)
+    .join(', ');
+  if (gradientType === 'linear') {
+    return `linear-gradient(${angle}deg, ${stopsStr})`;
+  } else {
+    return `radial-gradient(circle at center, ${stopsStr})`;
+  }
+}
+
+function applyGradient() {
+  const css = getGradientCSS();
+  preview.style.background = css;
+  previewLabel.textContent = css.length > 60 ? css.slice(0,57) + '...' : css;
+  if (gradientType === 'linear') {
+    angleIndicator.style.display = 'block';
+    angleIndicator.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+  } else {
+    angleIndicator.style.display = 'none';
+  }
+}
+
+// ─── Render stops UI ──────────────────────────
+function renderStops() {
+  stopsRow.innerHTML = '';
+  colorStops.forEach((stop, i) => {
+    const div = document.createElement('div');
+    div.className = 'stop';
+    div.draggable = true;
+    div.dataset.idx = i;
+
+    div.innerHTML = `
+      <div class="stop-color" style="background:${stop.color}" data-idx="${i}"></div>
+      <span class="stop-hex">${stop.color}</span>
+      <button class="stop-remove" data-idx="${i}">×</button>
+    `;
+
+    // Click on color circle to pick
+    div.querySelector('.stop-color').onclick = (e) => {
+      e.stopPropagation();
+      activeStopIdx = i;
+      colorPicker.value = colorStops[i].color;
+      colorPicker.click();
+    };
+
+    // Remove button
+    div.querySelector('.stop-remove').onclick = (e) => {
+      e.stopPropagation();
+      if (colorStops.length <= 2) {
+        showToast('至少保留 2 个颜色点');
+        return;
+      }
+      colorStops.splice(i, 1);
+      renderStops();
+      applyGradient();
+      updatePresetActive();
+    };
+
+    stopsRow.appendChild(div);
+  });
+
+  // Add stop button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-stop';
+  addBtn.textContent = '+';
+  addBtn.title = '添加颜色点';
+  addBtn.onclick = () => {
+    const lastColor = colorStops[colorStops.length-1]?.color || '#ffffff';
+    const r = Math.floor(colorStops.length / 2) * 50;
+    colorStops.push({ color: lastColor, pos: r });
+    renderStops();
+    applyGradient();
+    updatePresetActive();
+  };
+  stopsRow.appendChild(addBtn);
+}
+
+// ─── Color picker handler ─────────────────────
+colorPicker.addEventListener('input', () => {
+  if (activeStopIdx !== null && colorStops[activeStopIdx]) {
+    colorStops[activeStopIdx].color = colorPicker.value;
+    renderStops();
+    applyGradient();
+    updatePresetActive();
+    activeStopIdx = null;
+  }
+});
+
+// ─── Angle slider ─────────────────────────────
+angleSlider.addEventListener('input', () => {
+  angle = parseInt(angleSlider.value);
+  angleVal.textContent = angle + '°';
+  applyGradient();
+});
+
+// ─── Preview drag for angle ───────────────────
+let isDraggingAngle = false;
+preview.addEventListener('mousedown', (e) => {
+  if (gradientType !== 'linear') return;
+  isDraggingAngle = true;
+  updateAngleFromMouse(e);
+});
+window.addEventListener('mousemove', (e) => {
+  if (!isDraggingAngle) return;
+  updateAngleFromMouse(e);
+});
+window.addEventListener('mouseup', () => { isDraggingAngle = false; });
+preview.addEventListener('touchstart', (e) => {
+  if (gradientType !== 'linear') return;
+  isDraggingAngle = true;
+  updateAngleFromMouse(e.touches[0]);
+});
+window.addEventListener('touchmove', (e) => {
+  if (!isDraggingAngle) return;
+  updateAngleFromMouse(e.touches[0]);
+});
+window.addEventListener('touchend', () => { isDraggingAngle = false; });
+
+function updateAngleFromMouse(e) {
+  const rect = preview.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const dx = e.clientX - cx;
+  const dy = e.clientY - cy;
+  angle = Math.round((Math.atan2(dy, dx) * 180 / Math.PI) + 90);
+  if (angle < 0) angle += 360;
+  angleSlider.value = angle;
+  angleVal.textContent = angle + '°';
+  applyGradient();
+}
+
+// ─── Type toggle ──────────────────────────────
+document.querySelectorAll('.type-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.type-toggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    gradientType = btn.dataset.type;
+    angleGroup.style.display = gradientType === 'linear' ? 'flex' : 'none';
+    applyGradient();
+  });
+});
+
+// ─── Presets ───────────────────────────────────
+function renderPresets() {
+  const container = document.getElementById('presets');
+  container.innerHTML = '';
+  presets.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'preset';
+    div.style.background = `linear-gradient(135deg, ${p.stops.map(s => s.color + ' ' + s.pos + '%').join(', ')})`;
+    div.innerHTML = `<span class="preset-name">${p.name}</span>`;
+    div.onclick = () => {
+      colorStops = JSON.parse(JSON.stringify(p.stops));
+      activeStopIdx = null;
+      renderStops();
+      applyGradient();
+      updatePresetActive();
+    };
+    container.appendChild(div);
+  });
+}
+
+function updatePresetActive() {
+  document.querySelectorAll('.preset').forEach((el, i) => {
+    const p = presets[i];
+    const match = p.stops.length === colorStops.length &&
+      p.stops.every((s, j) => s.color === colorStops[j]?.color);
+    el.classList.toggle('active', match);
+  });
+}
+
+// ─── Random ────────────────────────────────────
+document.getElementById('btnRandom').addEventListener('click', () => {
+  const hue = Math.random() * 360;
+  const schemes = [
+    // Analogous
+    () => [
+      { color: hslToHex(hue, 80, 55), pos: 0 },
+      { color: hslToHex((hue + 30) % 360, 70, 60), pos: 50 },
+      { color: hslToHex((hue + 60) % 360, 80, 50), pos: 100 },
+    ],
+    // Complementary
+    () => [
+      { color: hslToHex(hue, 70, 55), pos: 0 },
+      { color: hslToHex((hue + 180) % 360, 60, 50), pos: 100 },
+    ],
+    // Triadic
+    () => [
+      { color: hslToHex(hue, 75, 55), pos: 0 },
+      { color: hslToHex((hue + 120) % 360, 70, 50), pos: 100 },
+    ],
+    // Warm gradient
+    () => [
+      { color: hslToHex(Math.random() * 60, 85, 50), pos: 0 },
+      { color: hslToHex(Math.random() * 60 + 300, 80, 55), pos: 100 },
+    ],
+    // Cool gradient
+    () => [
+      { color: hslToHex(180 + Math.random() * 80, 60, 45), pos: 0 },
+      { color: hslToHex(200 + Math.random() * 60, 70, 50), pos: 100 },
+    ],
+  ];
+  const gen = schemes[Math.floor(Math.random() * schemes.length)];
+  colorStops = gen();
+  activeStopIdx = null;
+  renderStops();
+  applyGradient();
+  updatePresetActive();
+
+  // Visual feedback on button
+  const btn = document.getElementById('btnRandom');
+  btn.style.transform = 'scale(0.95)';
+  setTimeout(() => btn.style.transform = '', 150);
+});
+
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+// ─── Copy CSS ──────────────────────────────────
+document.getElementById('btnCopy').addEventListener('click', async () => {
+  const css = getGradientCSS();
+  const fullCSS = `background: ${css};`;
+  try {
+    await navigator.clipboard.writeText(fullCSS);
+    showToast('✅ CSS 已复制到剪贴板');
+  } catch {
+    showToast('⚠️ 复制失败，请手动选择');
+  }
+});
+
+// ─── Toast ─────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  clearTimeout(toastTimer);
+  toast.textContent = msg;
+  toast.classList.add('show');
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ─── Init ──────────────────────────────────────
+renderPresets();
+renderStops();
+applyGradient();
+</script>
+</body>
+</html>
