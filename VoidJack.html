@@ -343,6 +343,10 @@ body::after {
   animation: avatarFloat 1.2s ease-in-out infinite;
   transform: scale(1.25);
 }
+.dealer-avatar.player-avatar.lose-face {
+  filter: drop-shadow(0 0 12px rgba(255,45,120,0.8)) drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+  animation: avatarFloat 0.6s ease-in-out infinite;
+}
 
 /* ─── Card Flip ─── */
 .card.flip {
@@ -389,7 +393,7 @@ body::after {
       <div class="logo">VOID JACK</div>
       <div class="chip-area">
         <div class="chip-icon"></div>
-        <span class="chip-count" id="chipCount">$1000</span>
+        <span class="chip-count" id="chipCount">$3000</span>
       </div>
     </div>
 
@@ -439,7 +443,7 @@ body::after {
 const suits = ['♠','♥','♦','♣'];
 const suitColors = { '♠':'black', '♥':'red', '♦':'red', '♣':'black' };
 let deck=[], playerHand=[], dealerHand=[];
-let chips=1000, currentBet=0;
+let chips=3000, currentBet=0;
 let gameActive=false, playerStood=false, selectedBet=0;
 
 const $=id=>document.getElementById(id);
@@ -586,9 +590,17 @@ function settleGame(){
 }
 function endRound(text, cls) {
   gameActive=false; showMessage(text,cls); setControls(false); renderAll(); updateBet();
+  const face = document.getElementById('playerAvatar');
   if (cls === 'win') {
-    document.getElementById('playerAvatar').classList.add('win-face');
-    setTimeout(() => document.getElementById('playerAvatar').classList.remove('win-face'), 2500);
+    face.classList.add('win-face');
+    setTimeout(() => face.classList.remove('win-face'), 2500);
+  } else if (cls === 'lose') {
+    face.textContent = '😢';
+    face.classList.add('lose-face');
+    setTimeout(() => {
+      face.classList.remove('lose-face');
+      updatePlayerFace(0); // reset to neutral on next round
+    }, 2500);
   }
 }
 
