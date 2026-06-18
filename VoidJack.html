@@ -150,7 +150,7 @@ body::after {
 
 /* ─── Cards ─── */
 .card {
-  width:80px; height:112px; border-radius:8px;
+  width:100px; height:140px; border-radius:9px;
   background: #1a1028;
   border: 2px solid rgba(255,255,255,0.12);
   position:relative; font-family:'Press Start 2P',monospace;
@@ -173,15 +173,15 @@ body::after {
 .card-back-inner::after {
   content:'×'; font-size:36px; color:rgba(255,45,120,0.5); text-shadow:0 0 12px rgba(255,45,120,0.3);
 }
-.card-rank { font-size:28px; line-height:1; }
-.card-suit { font-size:22px; margin-top:2px; }
+.card-rank { font-size:34px; line-height:1; }
+.card-suit { font-size:26px; margin-top:3px; }
 .card-suit-red { color:var(--neon-red); text-shadow:0 0 8px rgba(255,0,68,0.5); }
 .card-suit-black { color:#fff; text-shadow:0 0 8px rgba(255,255,255,0.3); }
 .card-corner {
-  position:absolute; top:6px; left:8px; font-size:10px;
+  position:absolute; top:8px; left:10px; font-size:12px;
   display:flex; flex-direction:column; align-items:center; line-height:1.1;
 }
-.card-center-suit { font-size:36px; opacity:0.08; position:absolute; pointer-events:none; }
+.card-center-suit { font-size:44px; opacity:0.08; position:absolute; pointer-events:none; }
 
 /* Card glitch effects */
 .card.glitch { animation: cardGlitch 0.25s ease; }
@@ -312,18 +312,53 @@ body::after {
   100%{ text-shadow: 0 0 var(--neon-pink), 0 0 var(--neon-cyan); }
 }
 
+/* ─── Dealer Avatar ─── */
+.dealer-avatar {
+  font-size:38px;
+  filter: drop-shadow(0 0 8px rgba(255,45,120,0.6)) drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+  animation: avatarFloat 3s ease-in-out infinite, avatarGlitch 5s ease infinite;
+  line-height:1;
+}
+@keyframes avatarFloat {
+  0%,100% { transform:translateY(0); }
+  50% { transform:translateY(-4px); }
+}
+@keyframes avatarGlitch {
+  0%,94%,100% { transform:translateY(0) scaleX(1); }
+  95% { transform:translateY(-2px) scaleX(0.9); }
+  96% { transform:translateY(2px) scaleX(1.1); filter:drop-shadow(0 0 12px var(--neon-pink)); }
+  97% { transform:translateY(0) scaleX(1); }
+}
+
+/* ─── Card Flip ─── */
+.card.flip {
+  animation: cardFlip 0.5s ease;
+}
+@keyframes cardFlip {
+  0% { transform:rotateY(0); }
+  49% { transform:rotateY(90deg); }
+  50% { transform:rotateY(-90deg); }
+  100% { transform:rotateY(0); }
+}
+
+/* ─── Particle Canvas ─── */
+#particleCanvas {
+  position:fixed; inset:0; z-index:150; pointer-events:none;
+}
+
 /* ─── Responsive ─── */
 @media (max-width:600px) {
-  .card { width:56px; height:78px; }
-  .card-rank { font-size:20px; }
-  .card-suit { font-size:16px; }
+  .card { width:60px; height:84px; }
+  .card-rank { font-size:22px; }
+  .card-suit { font-size:18px; }
   .cards-row { gap:8px; }
-  .btn { font-size:8px; padding:10px 14px; }
-  .btn-deal { font-size:10px; padding:12px 20px; }
-  .table { padding:12px 14px 10px; height:96vh; }
-  .logo { font-size:12px; }
+  .btn { font-size:8px; padding:10px 12px; }
+  .btn-deal { font-size:10px; padding:12px 18px; }
+  .table { padding:10px 12px 8px; height:96vh; }
+  .logo { font-size:11px; }
   .chip-count { font-size:13px; }
   .bet-chip { width:40px; height:40px; font-size:7px; }
+  .dealer-avatar { font-size:28px; }
 }
 
 </style>
@@ -331,6 +366,7 @@ body::after {
 <body>
 <div class="glitch-flash" id="glitchFlash"></div>
 <div class="vignette"></div>
+<canvas id="particleCanvas"></canvas>
 
 <div class="table" id="table">
   <div class="table-inner">
@@ -346,6 +382,7 @@ body::after {
     <div class="hands">
       <div class="zone dealer">
         <div class="zone-header">
+          <span class="dealer-avatar">😈</span>
           <span class="zone-label dl">♦ DEALER</span>
           <span class="zone-score-badge" id="dealerScore"></span>
         </div>
@@ -542,6 +579,130 @@ document.addEventListener('keydown',e=>{
   if(e.key==='s'||e.key==='S')stand();
   if(e.key==='d'||e.key==='D')double();
 });
+
+// ─── Particle System ──────────────────────
+const pCanvas = document.getElementById('particleCanvas');
+const pCtx = pCanvas.getContext('2d');
+let particles = [];
+
+function resizeParticles() {
+  pCanvas.width = window.innerWidth;
+  pCanvas.height = window.innerHeight;
+}
+resizeParticles();
+window.addEventListener('resize', resizeParticles);
+
+function spawnParticles(x, y, count, colors, type) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 2 + Math.random() * 6;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 2,
+      life: 1,
+      decay: 0.01 + Math.random() * 0.03,
+      size: type === 'chip' ? 3 + Math.random() * 5 : 1.5 + Math.random() * 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      type: type || 'spark',
+    });
+  }
+}
+
+function burstWin() {
+  const cx = window.innerWidth / 2;
+  const cy = window.innerHeight / 2;
+  const winColors = ['#39ff14','#ffe600','#00f0ff','#ff2d78','#b347ea','#fff'];
+  // Multiple bursts
+  for (let b = 0; b < 3; b++) {
+    setTimeout(() => {
+      spawnParticles(cx + (Math.random()-0.5)*200, cy + (Math.random()-0.5)*100, 40, winColors, 'chip');
+    }, b * 150);
+  }
+  // Ambient sparkles
+  spawnParticles(cx, cy, 30, ['#ffe600','#fff'], 'spark');
+}
+
+function burstDeal() {
+  const rect = playerCards.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  spawnParticles(cx, cy, 8, ['#00f0ff','#fff'], 'spark');
+}
+
+function ambientSparkle() {
+  if (!gameActive) return;
+  const rect = table.getBoundingClientRect();
+  const x = rect.left + Math.random() * rect.width;
+  const y = rect.top + Math.random() * rect.height;
+  spawnParticles(x, y, 1, ['rgba(255,255,255,0.3)'], 'spark');
+}
+
+function animateParticles() {
+  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+  particles = particles.filter(p => p.life > 0);
+  for (let p of particles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.08; // gravity
+    p.life -= p.decay;
+    pCtx.globalAlpha = p.life;
+    pCtx.fillStyle = p.color;
+    if (p.type === 'chip') {
+      pCtx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+      // Glow
+      pCtx.shadowColor = p.color;
+      pCtx.shadowBlur = 8;
+      pCtx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+      pCtx.shadowBlur = 0;
+    } else {
+      pCtx.beginPath();
+      pCtx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      pCtx.fill();
+    }
+  }
+  pCtx.globalAlpha = 1;
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// Ambient sparkle interval
+setInterval(() => {
+  if (gameActive && Math.random() < 0.15) ambientSparkle();
+}, 800);
+
+// ─── Card Flip on Reveal ──────────────────
+const origDealerPlay = dealerPlay;
+dealerPlay = function() {
+  // When dealer reveals hidden card, sparkle
+  setTimeout(() => {
+    const rect = dealerCards.getBoundingClientRect();
+    spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, 6, ['#ff2d78','#fff'], 'spark');
+  }, 600);
+  origDealerPlay();
+};
+
+function settleGame(){
+  const pv=handValue(playerHand), dv=handValue(dealerHand); renderAll();
+  // Animate dealer card reveal
+  const cards = dealerCards.querySelectorAll('.card:not(.card-back)');
+  if (cards.length > 1) {
+    cards[0].classList.add('flip');
+    setTimeout(() => cards[0].classList.remove('flip'), 500);
+  }
+  if(isBust(dealerHand)){ chips+=currentBet*2; endRound('庄家爆牌! YOU WIN!','win'); flashChips(); burstWin(); }
+  else if(pv>dv){ chips+=currentBet*2; endRound('YOU WIN! 你赢了!','win'); flashChips(); burstWin(); }
+  else if(pv===dv){ chips+=currentBet; endRound('PUSH 平局','push'); }
+  else { endRound('DEALER WINS 庄家赢','lose'); flash(); }
+  updateChips();
+}
+
+// Win particles on blackjack too
+const origEndRound = endRound;
+endRound = function(text, cls) {
+  origEndRound(text, cls);
+  if (cls === 'win') burstWin();
+};
 
 createDeck(); updateBet(); updateChips(); showMessage('✦ 下注开始游戏 ✦','');
 </script>
