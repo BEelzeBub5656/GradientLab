@@ -645,15 +645,43 @@ function spawnParticles(x, y, count, colors, type) {
 function burstWin() {
   const cx = window.innerWidth / 2;
   const cy = window.innerHeight / 2;
-  const winColors = ['#39ff14','#ffe600','#00f0ff','#ff2d78','#b347ea','#fff'];
-  // Multiple bursts
-  for (let b = 0; b < 3; b++) {
+  const winColors = ['#39ff14','#ffe600','#00f0ff','#ff2d78','#b347ea','#fff','#ffdd59','#00ff88'];
+  // Massive multi-wave burst
+  for (let b = 0; b < 5; b++) {
     setTimeout(() => {
-      spawnParticles(cx + (Math.random()-0.5)*200, cy + (Math.random()-0.5)*100, 40, winColors, 'chip');
-    }, b * 150);
+      const bx = cx + (Math.random()-0.5)*300;
+      const by = cy + (Math.random()-0.5)*150;
+      spawnParticles(bx, by, 60, winColors, 'chip');
+      spawnParticles(bx, by, 20, ['#ffe600','#fff'], 'spark');
+    }, b * 120);
   }
-  // Ambient sparkles
-  spawnParticles(cx, cy, 30, ['#ffe600','#fff'], 'spark');
+  // Ring burst (sparks shooting outward in a circle)
+  for (let a = 0; a < 360; a += 18) {
+    const rad = a * Math.PI / 180;
+    const sx = cx + Math.cos(rad) * 20;
+    const sy = cy + Math.sin(rad) * 20;
+    particles.push({
+      x: sx, y: sy,
+      vx: Math.cos(rad) * (8 + Math.random() * 6),
+      vy: Math.sin(rad) * (8 + Math.random() * 6) - 3,
+      life: 1, decay: 0.008 + Math.random() * 0.012,
+      size: 2.5 + Math.random() * 4,
+      color: winColors[Math.floor(Math.random() * winColors.length)],
+      type: 'spark',
+    });
+  }
+  // Gold rain (chip-shaped particles falling from top)
+  for (let i = 0; i < 25; i++) {
+    setTimeout(() => {
+      spawnParticles(
+        Math.random() * window.innerWidth,
+        -20,
+        8,
+        ['#ffe600','#ffdd59','#f0c000'],
+        'chip'
+      );
+    }, 400 + i * 60);
+  }
 }
 
 function burstDeal() {
@@ -701,16 +729,15 @@ animateParticles();
 
 // Ambient sparkle interval
 setInterval(() => {
-  if (gameActive && Math.random() < 0.15) ambientSparkle();
-}, 800);
+  if (gameActive && Math.random() < 0.25) ambientSparkle();
+}, 600);
 
 // ─── Card Flip on Reveal ──────────────────
 const origDealerPlay = dealerPlay;
 dealerPlay = function() {
-  // When dealer reveals hidden card, sparkle
   setTimeout(() => {
     const rect = dealerCards.getBoundingClientRect();
-    spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, 6, ['#ff2d78','#fff'], 'spark');
+    spawnParticles(rect.left + rect.width/2, rect.top + rect.height/2, 12, ['#ff2d78','#ffdd59','#fff'], 'spark');
   }, 600);
   origDealerPlay();
 };
