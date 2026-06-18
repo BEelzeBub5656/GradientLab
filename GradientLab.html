@@ -501,14 +501,43 @@
   .cp-close:hover { color: var(--text); }
 
   @media (max-width: 600px) {
-    .color-panel { grid-template-columns: 1fr; }
-    .cp-satbox { max-width: 200px; }
-  }
+    .color-panel {
+      grid-template-columns: 1fr;
+      padding: 14px;
+      gap: 14px;
+    }
+    .cp-satbox { max-width: 160px; }
 
-  @media (max-width: 600px) {
-    .presets { grid-template-columns: repeat(3, 1fr); }
-    .controls-row { flex-direction: column; align-items: flex-start; }
-    .preview { height: 260px; }
+    .presets { grid-template-columns: repeat(4, 1fr); gap:8px; }
+    .preset { height: 44px; }
+    .controls-row { flex-direction: column; align-items: flex-start; gap:10px; }
+    .preview { height: 200px; }
+
+    body { padding: 12px; align-items: flex-start; }
+    .app { max-width: 100%; gap: 16px; }
+    .logo { font-size: 18px; }
+
+    .card { padding: 16px; }
+    .stop { padding: 6px 8px; }
+    .stop-color { width: 22px; height: 22px; }
+    .stop-hex { font-size: 11px; min-width: 44px; }
+    .add-stop { width: 32px; height: 32px; }
+
+    .btn { font-size: 13px; padding: 8px 14px; }
+    .btn.primary { font-size: 14px; }
+
+    .angle-slider { width: 80px; }
+    .type-toggle button { padding: 6px 10px; font-size: 12px; }
+
+    .cp-quick-colors { grid-template-columns: repeat(7, 1fr); gap:4px; }
+    .cp-quick-color { border-radius: 4px; }
+    .cp-hex-input { width: 72px; font-size: 12px; }
+    .cp-preview { height: 38px; }
+    .hue-slider { height: 10px; }
+    .hue-slider::-webkit-slider-thumb { width: 16px; height: 16px; }
+
+    .preview-label { font-size: 10px; padding: 4px 10px; bottom: 10px; right: 10px; }
+    .angle-indicator { height: 40px; }
   }
 </style>
 </head>
