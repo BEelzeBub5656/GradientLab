@@ -37,10 +37,34 @@
   .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
   .logo .dot{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:16px;box-shadow:0 4px 12px -2px rgba(79,70,229,.5)}
   .logo b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .role-switch{display:flex;gap:4px;background:var(--surface);padding:4px;border-radius:var(--r-pill);box-shadow:var(--shadow)}
-  .role-switch button{border:0;background:transparent;padding:8px 16px;border-radius:var(--r-pill);font-size:13.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:.2s;font-family:inherit}
-  .role-switch button.active{background:var(--grad);color:#fff;box-shadow:0 4px 12px -3px rgba(79,70,229,.55)}
-  .role-switch button:not(.active):hover{background:var(--gray-bg);color:var(--ink)}
+  .topbar-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .user-badge{display:flex;align-items:center;gap:8px;background:var(--surface);padding:6px 14px 6px 6px;border-radius:var(--r-pill);box-shadow:var(--shadow);font-size:13px;font-weight:600}
+  .user-badge .avatar{width:30px;height:30px;border-radius:50%;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
+  .user-badge .role-tag{font-size:11px;font-weight:600;color:var(--brand);background:var(--info-bg);padding:2px 8px;border-radius:var(--r-pill)}
+  .btn-logout{border:0;font-family:inherit;font-size:12.5px;font-weight:600;padding:7px 16px;border-radius:var(--r-pill);cursor:pointer;transition:.2s;background:var(--gray-bg);color:var(--ink-soft)}
+  .btn-logout:hover{background:#e9e9ec;color:var(--ink)}
+
+  /* ---------- 登录页 ---------- */
+  .login-overlay{position:fixed;inset:0;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:20px;z-index:100}
+  .login-overlay.hidden{display:none}
+  .login-card{background:var(--surface);border-radius:20px;box-shadow:0 30px 80px -20px rgba(0,0,0,.45);width:min(400px,100%);padding:40px 34px}
+  .login-card .logo-area{text-align:center;margin-bottom:28px}
+  .login-card .logo-area .dot{width:48px;height:48px;border-radius:14px;background:var(--grad);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:24px;box-shadow:0 8px 20px -6px rgba(79,70,229,.55);margin-bottom:12px}
+  .login-card .logo-area h1{font-size:22px;font-weight:800;letter-spacing:-.3px}
+  .login-card .logo-area h1 b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .login-card .logo-area p{color:var(--ink-faint);font-size:13.5px;margin-top:4px}
+  .login-card .field{margin-bottom:16px}
+  .login-card label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:6px}
+  .login-card input{width:100%;font-family:inherit;font-size:15px;padding:12px 14px;border-radius:var(--r-sm);border:0;background:var(--paper);box-shadow:0 0 0 1px var(--line);color:var(--ink);transition:.18s}
+  .login-card input:focus{outline:0;box-shadow:0 0 0 2px var(--brand)}
+  .login-card .btn-login{width:100%;border:0;font-family:inherit;font-size:15px;font-weight:700;padding:13px;border-radius:var(--r-pill);cursor:pointer;transition:.2s;background:var(--grad);color:#fff;box-shadow:0 8px 20px -6px rgba(79,70,229,.65);margin-top:6px}
+  .login-card .btn-login:hover{transform:translateY(-1px);box-shadow:0 12px 28px -8px rgba(79,70,229,.75)}
+  .login-card .btn-login:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+  .login-error{text-align:center;color:#dc2626;font-size:13.5px;font-weight:500;margin-top:12px;display:none}
+  .login-hint{background:var(--info-bg);border-radius:var(--r-sm);padding:14px;margin-top:18px;font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .login-hint code{background:var(--surface);padding:2px 6px;border-radius:4px;font-size:12px;font-weight:600;box-shadow:0 0 0 1px var(--line)}
+  .login-hint .row{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px}
+  .login-hint .row span{display:inline-flex;align-items:center;gap:4px}
 
   /* ---------- 卡片 ---------- */
   .card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:22px}
@@ -166,16 +190,50 @@
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<!-- ============ 登录页 ============ -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="logo-area">
+      <div class="dot">🔧</div>
+      <h1>Campus<b>Repair</b></h1>
+      <p>校园智慧报修与后勤工单协同管理系统</p>
+    </div>
+    <form id="loginForm">
+      <div class="field">
+        <label>用户名</label>
+        <input id="loginUser" type="text" placeholder="student / admin / worker" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label>密码</label>
+        <input id="loginPass" type="password" placeholder="123" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-login" id="loginBtn">登 录</button>
+      <div class="login-error" id="loginError">用户名或密码错误</div>
+    </form>
+    <div class="login-hint">
+      🔑 测试账号 ｜ 密码均为 <code>123</code>
+      <div class="row">
+        <span>🎓 <code>student</code></span>
+        <span>📋 <code>admin</code></span>
+        <span>🛠️ <code>worker</code></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="appWrap">
 
   <!-- 顶栏 -->
   <div class="topbar">
     <div class="logo"><span class="dot">🔧</span> <span>Campus<b>Repair</b></span></div>
-    <div class="role-switch" id="roleSwitch">
-      <button data-role="home" class="active">🏠 首页</button>
-      <button data-role="student">🎓 学生</button>
-      <button data-role="admin">📋 管理员</button>
-      <button data-role="worker">🛠️ 维修人员</button>
+    <div class="topbar-right" id="topbarRight">
+      <div class="user-badge" id="userBadge">
+        <span class="avatar" id="userAvatar">?</span>
+        <span id="userDisplay">—</span>
+        <span class="role-tag" id="roleTag">—</span>
+      </div>
+      <button class="btn-logout" id="logoutBtn">退出登录</button>
     </div>
   </div>
 
@@ -184,18 +242,18 @@
     <div class="card hero">
       <span class="tag">浙江树人学院 · 人工智能期末大作业 · Vibe Coding</span>
       <h1>校园智慧报修<br><span class="g">与后勤工单协同管理系统</span></h1>
-      <p>面向高校宿舍、教室、实验室与公共区域的日常报修场景，覆盖「学生提交 → 管理员受理分派 → 维修处理 → 学生确认评价 → 统计分析」全流程闭环。数据本地持久化，刷新不丢失。</p>
+      <p>面向高校宿舍、教室、实验室与公共区域的日常报修场景，覆盖「学生提交 → 管理员受理分派 → 维修处理 → 学生确认评价 → 统计分析」全流程闭环。数据实时同步后端服务。</p>
       <div class="stats" id="homeStats">
-        <div class="stat"><div class="n" id="st-total">0</div><div class="l">累计工单</div></div>
+        <div class="stat"><div class="n" id="st-total">—</div><div class="l">累计工单</div></div>
         <div class="stat"><div class="n">3</div><div class="l">协同角色</div></div>
-        <div class="stat"><div class="n" id="st-open">0</div><div class="l">处理中</div></div>
-        <div class="stat"><div class="n">3</div><div class="l">维修师傅</div></div>
+        <div class="stat"><div class="n" id="st-open">—</div><div class="l">处理中</div></div>
+        <div class="stat"><div class="n" id="st-workers">—</div><div class="l">维修师傅</div></div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="sec-title"><span class="bar"></span>选择一个角色进入</div>
-      <div class="roles">
+    <div class="card" id="homeRoleCards">
+      <div class="sec-title"><span class="bar"></span>选择角色进入</div>
+      <div class="roles" id="roleCards">
         <div class="role-card" data-go="student">
           <div class="ico">🎓</div><h3>学生 / 教职工</h3>
           <p>提交报修工单、追踪我的报修进度、确认完工并评价</p>
@@ -245,7 +303,7 @@
         <div class="sec-title"><span class="bar"></span>填写报修信息</div>
         <form id="repairForm">
           <div class="form-grid">
-            <div class="field"><label>报修人姓名</label><input id="f-name" placeholder="如：陈宇杰" required></div>
+            <div class="field"><label>报修人</label><input id="f-name" readonly style="color:var(--ink-faint)"></div>
             <div class="field"><label>联系方式</label><input id="f-contact" placeholder="手机号 / 微信" required></div>
             <div class="field"><label>故障类型</label>
               <select id="f-cat" required>
@@ -258,7 +316,7 @@
             <div class="field full"><label>故障描述</label><textarea id="f-desc" placeholder="请详细描述故障现象，便于师傅快速处理…" required></textarea></div>
           </div>
           <div style="margin-top:18px;display:flex;gap:10px">
-            <button type="submit" class="btn primary">提交报修工单</button>
+            <button type="submit" class="btn primary" id="submitBtn">提交报修工单</button>
             <button type="reset" class="btn ghost">清空</button>
           </div>
         </form>
@@ -280,10 +338,10 @@
 
     <div id="adm-board">
       <div class="kpis">
-        <div class="kpi c1"><div class="n" id="k-pending">0</div><div class="l">待审核</div></div>
-        <div class="kpi c2"><div class="n" id="k-assigned">0</div><div class="l">已分配</div></div>
-        <div class="kpi c3"><div class="n" id="k-processing">0</div><div class="l">处理中</div></div>
-        <div class="kpi c4"><div class="n" id="k-done">0</div><div class="l">已完成</div></div>
+        <div class="kpi c1"><div class="n" id="k-pending">—</div><div class="l">待审核</div></div>
+        <div class="kpi c2"><div class="n" id="k-assigned">—</div><div class="l">已分配</div></div>
+        <div class="kpi c3"><div class="n" id="k-processing">—</div><div class="l">处理中</div></div>
+        <div class="kpi c4"><div class="n" id="k-done">—</div><div class="l">已完成/已评价</div></div>
       </div>
       <div class="card">
         <div class="sec-title"><span class="bar"></span>各状态工单分布</div>
@@ -307,9 +365,8 @@
   <!-- ============ 维修人员端 ============ -->
   <section class="view" id="view-worker">
     <div class="card" style="margin-bottom:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <label style="font-weight:700">当前师傅：</label>
-      <select id="workerSel" style="max-width:240px"></select>
-      <span class="pill cat" id="workerSkill"></span>
+      <span style="font-weight:700">当前维修工：</span>
+      <span id="workerNameDisplay" style="font-weight:600">—</span>
     </div>
     <div class="sec-title"><span class="bar"></span>分派给我的维修任务</div>
     <div id="workerList"></div>
@@ -329,88 +386,186 @@
 
 <script>
 "use strict";
-const KEY='campusrepair.v1';
-const STATUS={
+
+/* ===================== 配置 ===================== */
+const API_BASE = 'api/';
+
+const STATUS = {
   pending:{label:'待审核',cls:'pending'},
   assigned:{label:'已分配',cls:'assigned'},
   processing:{label:'处理中',cls:'processing'},
   done:{label:'已完成',cls:'done'},
   evaluated:{label:'已评价',cls:'evaluated'}
 };
-const WORKERS=[
-  {id:'w1',name:'王师傅',skill:'水电维修'},
-  {id:'w2',name:'李师傅',skill:'网络弱电'},
-  {id:'w3',name:'张师傅',skill:'综合维修'}
-];
-const now=Date.now();
-const H=3600*1000, D=24*H;
-function seed(){
-  let n=240501;
-  const t=(cat,loc,desc,name,status,worker,off,tl,rating)=>({
-    id:'WX'+(n++), category:cat, location:loc, desc, reporter:name, contact:'138****'+(1000+Math.floor(Math.random()*8999)),
-    status, worker:worker||null, createdAt:now-off, rating:rating||null,
-    timeline: tl
+
+/* ===================== 认证层 ===================== */
+let userName = localStorage.getItem('campus_userName') || '';
+let userRole = localStorage.getItem('campus_role') || '';
+let userId   = localStorage.getItem('campus_id') || '';
+
+function getToken() { return localStorage.getItem('campus_token'); }
+
+function isLoggedIn() { return !!getToken(); }
+
+function showLoginPage() {
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('appWrap').style.display = 'none';
+}
+function hideLoginPage() {
+  document.getElementById('loginOverlay').classList.add('hidden');
+  document.getElementById('appWrap').style.display = 'block';
+}
+
+async function apiFetch(path, options = {}) {
+  const headers = options.headers || {};
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+  const token = getToken();
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(API_BASE + path, { ...options, headers });
+  if (res.status === 401) {
+    toast('⏱ 登录已过期，请重新登录');
+    setTimeout(() => { doLogout(); }, 800);
+    throw new Error('未授权');
+  }
+  if (!res.ok) {
+    let msg = '请求失败 (' + res.status + ')';
+    try { const err = await res.json(); msg = err.detail || msg; } catch(e) {}
+    throw new Error(msg);
+  }
+  return res;
+}
+
+async function doLogin(username, password) {
+  const res = await fetch(API_BASE + 'login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username, password})
   });
-  return [
-    t('水电故障','3号宿舍楼 412室','卫生间水龙头持续漏水，关不紧，地面积水。','陈宇杰','evaluated','w1',6*D,
-      [['提交报修',6*D],['管理员受理，分派 王师傅',6*D-2*H],['王师傅已接单，处理中',5*D],['维修完成：更换密封圈',4*D-3*H],['学生确认并评价 ⭐⭐⭐⭐⭐',4*D-2*H]],5),
-    t('网络故障','图书馆 3楼自习区','靠窗一排座位 WiFi 信号极弱，无法连接校园网。','李雯','done','w2',3*D,
-      [['提交报修',3*D],['管理员受理，分派 李师傅',3*D-1*H],['李师傅处理中：排查AP',2*D],['维修完成：重启并加装AP',1*D]]),
-    t('空调暖通','教学楼 B-205','空调制冷不工作，出风为常温，影响上课。','王浩','processing','w3',2*D,
-      [['提交报修',2*D],['管理员受理，分派 张师傅',2*D-1*H],['张师傅已接单，处理中：检查制冷剂',1*D]]),
-    t('家具损坏','5号宿舍楼 308室','书桌抽屉滑轨脱落，无法正常开合。','刘洋','assigned','w3',1*D+6*H,
-      [['提交报修',1*D+6*H],['管理员受理，分派 张师傅',1*D]]),
-    t('门窗锁具','2号宿舍楼 521室','房门门锁卡顿，钥匙难以转动，存在安全隐患。','赵敏','assigned','w1',1*D+2*H,
-      [['提交报修',1*D+2*H],['管理员受理，分派 王师傅',1*D-2*H]]),
-    t('水电故障','实验楼 A-110','插座面板烧黑无电，疑似短路，已断电。','孙强','pending','',8*H,
-      [['提交报修',8*H]]),
-    t('网络故障','7号宿舍楼 215室','网线接口松动，台式机无法上网。','周婷','pending','',4*H,
-      [['提交报修',4*H]]),
-    t('其他','操场看台 东侧','看台座椅有破损松动，需检修加固。','吴迪','pending','',1*H,
-      [['提交报修',1*H]])
-  ].map(x=>({...x, timeline:x.timeline.map(([text,off])=>({text,time:now-off}))}));
+  if (!res.ok) throw new Error('用户名或密码错误');
+  const data = await res.json();
+  localStorage.setItem('campus_token', data.token);
+  localStorage.setItem('campus_role', data.role);
+  localStorage.setItem('campus_userName', data.name);
+  localStorage.setItem('campus_id', data.id);
+  userName = data.name;
+  userRole = data.role;
+  userId = data.id;
 }
 
-let DB = load();
-function load(){
-  try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d&&d.tickets) return d; }catch(e){}
-  const init={tickets:seed()}; localStorage.setItem(KEY,JSON.stringify(init)); return init;
+function doLogout() {
+  localStorage.removeItem('campus_token');
+  localStorage.removeItem('campus_role');
+  localStorage.removeItem('campus_userName');
+  localStorage.removeItem('campus_id');
+  userName = ''; userRole = ''; userId = '';
+  showLoginPage();
 }
-function save(){ localStorage.setItem(KEY,JSON.stringify(DB)); }
-let curWorker=WORKERS[0].id;
 
-/* ---------- 工具 ---------- */
-const $=s=>document.querySelector(s);
-const $$=s=>document.querySelectorAll(s);
-function fmt(ts){const d=new Date(ts);const p=n=>String(n).padStart(2,'0');return `${d.getMonth()+1}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
+/* ===================== 登录表单 ===================== */
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '登录中…';
+  try {
+    await doLogin(
+      document.getElementById('loginUser').value.trim(),
+      document.getElementById('loginPass').value
+    );
+    hideLoginPage();
+    updateUserBadge();
+    await initApp();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '登 录';
+  }
+});
+
+/* ===================== 用户信息显示 ===================== */
+function updateUserBadge() {
+  const roleMap = {student:'🎓 学生', admin:'📋 管理员', worker:'🛠️ 维修人员'};
+  document.getElementById('userAvatar').textContent = userName.charAt(0);
+  document.getElementById('userDisplay').textContent = userName;
+  document.getElementById('roleTag').textContent = roleMap[userRole] || userRole;
+}
+
+/* 首页角色卡片根据角色过滤 */
+function applyRoleFilter() {
+  const cards = document.querySelectorAll('#roleCards .role-card');
+  const container = document.getElementById('homeRoleCards');
+  if (userRole === 'student') {
+    cards.forEach(c => c.style.display = c.dataset.go === 'student' ? '' : 'none');
+    container.style.display = 'block';
+  } else if (userRole === 'admin') {
+    cards.forEach(c => c.style.display = c.dataset.go === 'admin' ? '' : 'none');
+    container.style.display = 'block';
+  } else if (userRole === 'worker') {
+    cards.forEach(c => c.style.display = c.dataset.go === 'worker' ? '' : 'none');
+    container.style.display = 'block';
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+/* ===================== 工具 ===================== */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+function fmt(ts){const d=new Date(ts);const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
 function ago(ts){const s=(Date.now()-ts)/1000;if(s<60)return'刚刚';if(s<3600)return Math.floor(s/60)+'分钟前';if(s<86400)return Math.floor(s/3600)+'小时前';return Math.floor(s/86400)+'天前';}
-function workerName(id){const w=WORKERS.find(w=>w.id===id);return w?w.name:'未分派';}
-function pill(st){return `<span class="pill ${STATUS[st].cls}">${STATUS[st].label}</span>`;}
-function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function pill(st){return `<span class="pill ${STATUS[st]?STATUS[st].cls:'pending'}">${STATUS[st]?STATUS[st].label:st}</span>`;}
+function esc(s){return (s||'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));}
 let toastT;
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2200);}
+function emptyHTML(e,p){return `<div class="empty"><div class="e">${e}</div><p>${p}</p></div>`;}
+function openModal(html){$('#modal').innerHTML=html;$('#overlay').classList.add('show');}
+window.closeModal=function(){$('#overlay').classList.remove('show');};
+$('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
-/* ---------- 路由 ---------- */
+/* ===================== 路由 ===================== */
 function go(role){
   $$('.view').forEach(v=>v.classList.remove('active'));
   $('#view-'+role).classList.add('active');
-  $$('#roleSwitch button').forEach(b=>b.classList.toggle('active',b.dataset.role===role));
   window.scrollTo({top:0,behavior:'smooth'});
   if(role==='home')renderHome();
-  if(role==='student')renderMine();
+  if(role==='student'){renderMine();}
   if(role==='admin'){renderBoard();renderAdmin();}
   if(role==='worker')renderWorker();
 }
-$('#roleSwitch').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.role);});
+
 $$('.role-card').forEach(c=>c.addEventListener('click',()=>go(c.dataset.go)));
 
-/* ---------- 首页 ---------- */
-function renderHome(){
-  $('#st-total').textContent=DB.tickets.length;
-  $('#st-open').textContent=DB.tickets.filter(t=>t.status==='processing'||t.status==='assigned').length;
+/* ===================== 首页 ===================== */
+async function renderHome() {
+  try {
+    const res = await apiFetch('tickets');
+    const tickets = await res.json();
+    const total = tickets.length;
+    const openCount = tickets.filter(t => t.status==='processing'||t.status==='assigned').length;
+    $('#st-total').textContent = total;
+    $('#st-open').textContent = openCount;
+  } catch(e) {
+    $('#st-total').textContent = '—';
+    $('#st-open').textContent = '—';
+  }
+  // 获取工人数量（仅管理员有权限，其他角色忽略）
+  try {
+    const res2 = await apiFetch('workers');
+    const workers = await res2.json();
+    $('#st-workers').textContent = workers.length;
+  } catch(e) {
+    $('#st-workers').textContent = '3';
+  }
 }
 
-/* ---------- 学生端 ---------- */
+/* ===================== 学生端 ===================== */
 $('#stuTabs').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   $$('#stuTabs button').forEach(x=>x.classList.toggle('active',x===b));
@@ -418,37 +573,62 @@ $('#stuTabs').addEventListener('click',e=>{
   $('#stu-mine').style.display=b.dataset.tab==='mine'?'block':'none';
   if(b.dataset.tab==='mine')renderMine();
 });
-$('#repairForm').addEventListener('submit',e=>{
+
+// 填上当前登录用户名
+if (userName) $('#f-name').value = userName;
+
+$('#repairForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
-  const t={
-    id:'WX'+Math.floor(240600+Math.random()*9000),
-    category:$('#f-cat').value, location:$('#f-loc').value.trim(),
-    desc:$('#f-desc').value.trim(), reporter:$('#f-name').value.trim(),
-    contact:$('#f-contact').value.trim(), status:'pending', worker:null,
-    createdAt:Date.now(), rating:null,
-    timeline:[{text:'提交报修',time:Date.now()}]
-  };
-  DB.tickets.unshift(t); save();
-  e.target.reset();
-  toast('✅ 报修已提交，工单号 '+t.id);
-  $$('#stuTabs button')[1].click();
+  const btn = $('#submitBtn');
+  btn.disabled = true;
+  btn.textContent = '提交中…';
+  try {
+    const body = {
+      category: $('#f-cat').value,
+      location: $('#f-loc').value.trim(),
+      description: $('#f-desc').value.trim()
+    };
+    const res = await apiFetch('tickets', {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+    const t = await res.json();
+    e.target.reset();
+    if (userName) $('#f-name').value = userName;
+    toast('✅ 报修已提交，工单号 ' + t.id);
+    $$('#stuTabs button')[1].click();
+  } catch(err) {
+    toast('❌ ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '提交报修工单';
+  }
 });
-function renderMine(){
-  const mine=DB.tickets;
+
+async function renderMine(){
   const box=$('#mineList');
-  if(!mine.length){box.innerHTML=emptyHTML('🗂️','还没有报修记录，去提交一条吧');return;}
-  box.innerHTML=mine.map(t=>ticketHTML(t,{
-    detail:true,
-    extra: t.status==='done' ? `<button class="btn primary sm" onclick="rate('${t.id}')">确认完工并评价</button>`
-         : t.status==='evaluated' ? `<span class="pill evaluated">已评价 ${'⭐'.repeat(t.rating||0)}</span>` : ''
-  })).join('');
+  try {
+    const res = await apiFetch('tickets');
+    const tickets = await res.json();
+    if(!tickets.length){box.innerHTML=emptyHTML('🗂️','还没有报修记录，去提交一条吧');return;}
+    box.innerHTML = tickets.map(t => ticketHTML(t, {
+      detail: true,
+      extra: t.status==='done'
+        ? `<button class="btn primary sm" onclick="rate('${t.id}')">确认完工并评价</button>`
+        : t.status==='evaluated'
+          ? `<span class="pill evaluated">已评价 ${'⭐'.repeat(t.rating||0)}</span>`
+          : ''
+    })).join('');
+  } catch(e) {
+    box.innerHTML = emptyHTML('⚠️','加载失败：'+e.message);
+  }
 }
-window.rate=function(id){
-  const t=DB.tickets.find(x=>x.id===id);if(!t)return;
+
+window.rate = async function(id) {
   openModal(`
     <button class="close" onclick="closeModal()">✕</button>
     <h2>确认完工并评价</h2>
-    <p style="color:var(--ink-soft);font-size:13.5px">工单 ${t.id} · ${esc(t.category)}</p>
+    <p style="color:var(--ink-soft);font-size:13.5px">工单 ${esc(id)}</p>
     <div style="font-size:30px;margin:20px 0;text-align:center" id="stars">
       ${[1,2,3,4,5].map(n=>`<span data-n="${n}" style="cursor:pointer">☆</span>`).join('')}
     </div>
@@ -462,14 +642,24 @@ window.rate=function(id){
   });
   $('#stars').onmouseleave=()=>paint(chosen);
   function paint(n){stars.forEach(s=>s.textContent=(+s.dataset.n<=n)?'⭐':'☆');}
-  $('#rateOk').onclick=()=>{
-    t.status='evaluated';t.rating=chosen;
-    t.timeline.push({text:`学生确认完工并评价 ${'⭐'.repeat(chosen)}`,time:Date.now()});
-    save();closeModal();toast('感谢评价！工单已闭环');renderMine();
+  $('#rateOk').onclick=async ()=>{
+    $('#rateOk').disabled=true;
+    try {
+      await apiFetch('tickets/' + id + '/rate', {
+        method: 'PUT',
+        body: JSON.stringify({rating: chosen})
+      });
+      closeModal();
+      toast('⭐ 感谢评价！工单已闭环');
+      await renderMine();
+    } catch(err) {
+      toast('❌ ' + err.message);
+      $('#rateOk').disabled=false;
+    }
   };
 };
 
-/* ---------- 管理员端 ---------- */
+/* ===================== 管理员端 ===================== */
 $('#adminTabs').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   $$('#adminTabs button').forEach(x=>x.classList.toggle('active',x===b));
@@ -477,127 +667,201 @@ $('#adminTabs').addEventListener('click',e=>{
   $('#adm-list').style.display=b.dataset.tab==='list'?'block':'none';
   if(b.dataset.tab==='board')renderBoard();else renderAdmin();
 });
+
 let curFilter='all';
 $('#filterTabs').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   $$('#filterTabs button').forEach(x=>x.classList.toggle('active',x===b));
   curFilter=b.dataset.f;renderAdmin();
 });
-function renderBoard(){
-  const c={pending:0,assigned:0,processing:0,done:0,evaluated:0};
-  DB.tickets.forEach(t=>c[t.status]++);
-  $('#k-pending').textContent=c.pending;
-  $('#k-assigned').textContent=c.assigned;
-  $('#k-processing').textContent=c.processing;
-  $('#k-done').textContent=c.done+c.evaluated;
-  const data=[['待审核',c.pending],['已分配',c.assigned],['处理中',c.processing],['已完成',c.done],['已评价',c.evaluated]];
-  const max=Math.max(1,...data.map(d=>d[1]));
-  $('#chart').innerHTML=data.map(([l,v])=>`
-    <div class="bar-wrap">
-      <div class="bar" style="height:0" data-h="${Math.round(v/max*130)+4}"><b>${v}</b></div>
-      <div class="lbl">${l}</div>
-    </div>`).join('');
-  requestAnimationFrame(()=>$$('#chart .bar').forEach(b=>b.style.height=b.dataset.h+'px'));
+
+/* 缓存工人列表 */
+let workersCache = [];
+async function getWorkers() {
+  if (workersCache.length) return workersCache;
+  try {
+    const res = await apiFetch('workers');
+    workersCache = await res.json();
+  } catch(e) {
+    workersCache = [];
+  }
+  return workersCache;
 }
-function renderAdmin(){
-  let list=DB.tickets;
-  if(curFilter!=='all')list=list.filter(t=>t.status===curFilter);
+
+async function renderBoard() {
+  try {
+    const res = await apiFetch('stats');
+    const stats = await res.json();
+    // stats keys: 待审核,已分配,处理中,已完成,已评价
+    const map = {'待审核':0,'已分配':0,'处理中':0,'已完成':0,'已评价':0};
+    Object.keys(stats).forEach(k => { map[k] = stats[k]; });
+    $('#k-pending').textContent = map['待审核'];
+    $('#k-assigned').textContent = map['已分配'];
+    $('#k-processing').textContent = map['处理中'];
+    $('#k-done').textContent = map['已完成'] + map['已评价'];
+    const data = [['待审核',map['待审核']],['已分配',map['已分配']],['处理中',map['处理中']],['已完成',map['已完成']],['已评价',map['已评价']]];
+    const max = Math.max(1,...data.map(d=>d[1]));
+    $('#chart').innerHTML = data.map(([l,v])=>`
+      <div class="bar-wrap">
+        <div class="bar" style="height:0" data-h="${Math.round(v/max*130)+4}"><b>${v}</b></div>
+        <div class="lbl">${l}</div>
+      </div>`).join('');
+    requestAnimationFrame(()=>$$('#chart .bar').forEach(b=>b.style.height=b.dataset.h+'px'));
+  } catch(e) {
+    $('#k-pending').textContent = '—';
+    $('#k-assigned').textContent = '—';
+    $('#k-processing').textContent = '—';
+    $('#k-done').textContent = '—';
+  }
+}
+
+async function renderAdmin(){
   const box=$('#adminList');
-  if(!list.length){box.innerHTML=emptyHTML('📭','该状态下暂无工单');return;}
-  box.innerHTML=list.map(t=>ticketHTML(t,{detail:true,extra:adminActions(t)})).join('');
+  try {
+    const res = await apiFetch('tickets');
+    let tickets = await res.json();
+    if (curFilter!=='all') tickets = tickets.filter(t => t.status === curFilter);
+    if (!tickets.length) { box.innerHTML = emptyHTML('📭','该状态下暂无工单'); return; }
+    // 预加载工人列表用于派单
+    await getWorkers();
+    box.innerHTML = tickets.map(t => ticketHTML(t, {detail:true, extra: adminActions(t)})).join('');
+  } catch(e) {
+    box.innerHTML = emptyHTML('⚠️','加载失败：'+e.message);
+  }
 }
+
 function adminActions(t){
   if(t.status==='pending'){
     return `<select class="assignSel" data-id="${t.id}" style="max-width:170px">
       <option value="">选择维修师傅…</option>
-      ${WORKERS.map(w=>`<option value="${w.id}">${w.name}（${w.skill}）</option>`).join('')}
+      ${workersCache.map(w => `<option value="${w.id}">${esc(w.name)}${w.contact ? '（'+esc(w.contact)+'）' : ''}</option>`).join('')}
     </select>
     <button class="btn primary sm" onclick="assign('${t.id}')">受理并分派</button>`;
   }
-  return `<span class="pill cat">负责师傅：${workerName(t.worker)}</span>`;
+  const w = workersCache.find(x=>x.id===t.worker_id||x.id===t.worker);
+  return `<span class="pill cat">负责师傅：${w ? esc(w.name) : esc(t.worker_name) || '未分派'}</span>`;
 }
-window.assign=function(id){
-  const sel=document.querySelector(`.assignSel[data-id="${id}"]`);
-  const wid=sel.value;
-  if(!wid){toast('请先选择维修师傅');return;}
-  const t=DB.tickets.find(x=>x.id===id);
-  t.status='assigned';t.worker=wid;
-  t.timeline.push({text:`管理员受理，分派 ${workerName(wid)}`,time:Date.now()});
-  save();toast('已分派给 '+workerName(wid));renderAdmin();
+
+window.assign = async function(id) {
+  const sel = document.querySelector(`.assignSel[data-id="${id}"]`);
+  const wid = sel.value;
+  if (!wid) { toast('请先选择维修师傅'); return; }
+  try {
+    await apiFetch('tickets/' + id + '/assign', {
+      method: 'PUT',
+      body: JSON.stringify({worker_id: wid})
+    });
+    toast('✅ 已分派');
+    await renderAdmin();
+  } catch(e) {
+    toast('❌ ' + e.message);
+  }
 };
 
-/* ---------- 维修人员端 ---------- */
-function initWorkerSel(){
-  $('#workerSel').innerHTML=WORKERS.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
-  $('#workerSel').value=curWorker;
-  updWorkerSkill();
-}
-function updWorkerSkill(){const w=WORKERS.find(w=>w.id===curWorker);$('#workerSkill').textContent='技能：'+w.skill;}
-$('#workerSel').addEventListener('change',e=>{curWorker=e.target.value;updWorkerSkill();renderWorker();});
-function renderWorker(){
-  updWorkerSkill();
-  const list=DB.tickets.filter(t=>t.worker===curWorker && t.status!=='pending');
+/* ===================== 维修人员端 ===================== */
+async function renderWorker(){
   const box=$('#workerList');
-  if(!list.length){box.innerHTML=emptyHTML('🧰','当前没有分派给你的任务');return;}
-  box.innerHTML=list.map(t=>ticketHTML(t,{detail:true,extra:workerActions(t)})).join('');
+  document.getElementById('workerNameDisplay').textContent = userName || '—';
+  try {
+    const res = await apiFetch('tickets');
+    const tickets = await res.json();
+    if(!tickets.length){box.innerHTML=emptyHTML('🧰','当前没有分派给你的任务');return;}
+    box.innerHTML = tickets.map(t => ticketHTML(t, {detail:true, extra: workerActions(t)})).join('');
+  } catch(e) {
+    box.innerHTML = emptyHTML('⚠️','加载失败：'+e.message);
+  }
 }
+
 function workerActions(t){
   if(t.status==='assigned')return `<button class="btn primary sm" onclick="advance('${t.id}','processing')">开始处理</button>`;
   if(t.status==='processing')return `<button class="btn primary sm" onclick="advance('${t.id}','done')">标记完成</button>`;
-  return `<span class="pill ${STATUS[t.status].cls}">${STATUS[t.status].label}</span>`;
+  return `<span class="pill ${STATUS[t.status]?STATUS[t.status].cls:'pending'}">${STATUS[t.status]?STATUS[t.status].label:t.status}</span>`;
 }
-window.advance=function(id,to){
-  const t=DB.tickets.find(x=>x.id===id);
-  t.status=to;
-  t.timeline.push({text: to==='processing'?`${workerName(t.worker)} 已接单，开始处理`:`${workerName(t.worker)} 维修完成，待学生确认`, time:Date.now()});
-  save();toast(to==='processing'?'已开始处理':'已标记完成');renderWorker();
+
+window.advance = async function(id, to) {
+  const statusMap = {processing:'处理中', done:'已完成'};
+  try {
+    await apiFetch('tickets/' + id + '/status', {
+      method: 'PUT',
+      body: JSON.stringify({status: statusMap[to]})
+    });
+    toast(to==='processing'?'已开始处理':'✅ 已标记完成');
+    await renderWorker();
+  } catch(e) {
+    toast('❌ ' + e.message);
+  }
 };
 
-/* ---------- 通用渲染 ---------- */
-function ticketHTML(t,opt={}){
+/* ===================== 通用渲染 ===================== */
+function ticketHTML(t, opt={}){
+  const statusKey = t.status;
   return `<div class="ticket">
     <div class="head">
       <div>
-        <div class="id">${t.id}</div>
+        <div class="id">${esc(t.id)}</div>
         <div class="ttl">${esc(t.location)}</div>
       </div>
-      ${pill(t.status)}
+      ${pill(statusKey)}
     </div>
     <div class="meta">
       <span><span class="pill cat">${esc(t.category)}</span></span>
-      <span>👤 ${esc(t.reporter)}</span>
-      <span>📞 ${esc(t.contact)}</span>
-      <span>🕒 ${ago(t.createdAt)}</span>
+      <span>👤 ${esc(t.reporter_name || t.reporter || '—')}</span>
+      <span>📞 ${esc(t.contact || '—')}</span>
+      <span>🕒 ${t.create_time ? ago(new Date(t.create_time).getTime()) : '—'}</span>
     </div>
-    <div class="desc">${esc(t.desc)}</div>
+    <div class="desc">${esc(t.description || t.desc)}</div>
     <div class="actions">
       ${opt.detail?`<button class="btn ghost sm" onclick="detail('${t.id}')">查看时间线</button>`:''}
       ${opt.extra||''}
     </div>
   </div>`;
 }
-window.detail=function(id){
-  const t=DB.tickets.find(x=>x.id===id);if(!t)return;
-  openModal(`
-    <button class="close" onclick="closeModal()">✕</button>
-    <h2>工单 ${t.id}</h2>
-    <p style="color:var(--ink-soft);font-size:13.5px">${esc(t.location)} · ${esc(t.category)} · ${pill(t.status)}</p>
-    <p style="margin-top:12px;font-size:14px;color:var(--ink-soft)">${esc(t.desc)}</p>
-    <div style="margin-top:6px;font-size:12.5px;color:var(--ink-faint)">报修人 ${esc(t.reporter)} · ${esc(t.contact)} · 负责师傅 ${workerName(t.worker)}</div>
-    <div class="timeline">
-      ${t.timeline.map(e=>`<div class="tl-item"><div class="tt">${esc(e.text)}</div><div class="td">${fmt(e.time)}</div></div>`).join('')}
-    </div>
-  `);
-};
-function emptyHTML(e,p){return `<div class="empty"><div class="e">${e}</div><p>${p}</p></div>`;}
-function openModal(html){$('#modal').innerHTML=html;$('#overlay').classList.add('show');}
-window.closeModal=function(){$('#overlay').classList.remove('show');};
-$('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeModal();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
-/* ---------- 启动 ---------- */
-initWorkerSel();
-renderHome();
+window.detail = async function(id) {
+  try {
+    const res = await apiFetch('tickets/' + id);
+    const t = await res.json();
+    openModal(`
+      <button class="close" onclick="closeModal()">✕</button>
+      <h2>工单 ${esc(t.id)}</h2>
+      <p style="color:var(--ink-soft);font-size:13.5px">${esc(t.location)} · ${esc(t.category)} · ${pill(t.status)}</p>
+      <p style="margin-top:12px;font-size:14px;color:var(--ink-soft)">${esc(t.description || t.desc)}</p>
+      <div style="margin-top:6px;font-size:12.5px;color:var(--ink-faint)">报修人 ${esc(t.reporter_name || t.reporter)} · 负责师傅 ${esc(t.worker_name || '未分派')}</div>
+      <div class="timeline">
+        ${(t.timeline||[]).map(e => `<div class="tl-item"><div class="tt">${esc(e.action||e.text)}</div><div class="td">${fmt(new Date(e.op_time||e.time).getTime())}</div></div>`).join('')}
+      </div>
+    `);
+  } catch(e) {
+    toast('❌ ' + e.message);
+  }
+};
+
+/* ===================== 退出登录 ===================== */
+$('#logoutBtn').addEventListener('click', doLogout);
+
+/* ===================== 启动 ===================== */
+async function initApp() {
+  // 更新学生表单中的姓名
+  $('#f-name').value = userName;
+  // 根据角色过滤首页角色卡片
+  applyRoleFilter();
+  // 渲染首页
+  await renderHome();
+  // 如果是特定角色，直接跳转到对应视图
+  if (userRole === 'student') go('student');
+  else if (userRole === 'admin') go('admin');
+  else if (userRole === 'worker') go('worker');
+  else go('home');
+}
+
+// 页面加载
+if (isLoggedIn()) {
+  updateUserBadge();
+  hideLoginPage();
+  initApp();
+} else {
+  showLoginPage();
+}
 </script>
 </body>
 </html>
