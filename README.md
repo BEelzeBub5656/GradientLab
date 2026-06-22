@@ -16,6 +16,16 @@
 
 浏览器直接打开 `GradientLab.html` 即可运行。
 
+仓库同时包含：
+
+- `CampusRepair.html`：校园智慧报修 Web 版本
+- `campusrepair-design.html`：CampusRepair 项目设计图
+- `app/`：可离线运行的 CampusRepair Flutter Android 工程
+- `server/`：CampusRepair Node.js + Express + SQLite 后端
+- `VoidJack.html`：21 点游戏项目
+
+CampusRepair APK 可在仓库的 [Releases](https://github.com/BEelzeBub5656/GradientLab/releases) 页面下载。
+
 ## 开发方式
 
 通过 Hermes Agent (DeepSeek v4 Pro) 以自然语言提示词驱动开发（Vibe Coding），配合 Playwright 浏览器自动化进行测试验证。
