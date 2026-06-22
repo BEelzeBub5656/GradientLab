@@ -5,326 +5,334 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CampusRepair · 项目设计文档</title>
 <style>
-/* ===== Reset & Base ===== */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
   font-family:'Inter','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
   background:#fafaf7;
-  color:#1a1a1a;
+  color:#1a1a2e;
   line-height:1.6;
   -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale
 }
-img{max-width:100%;display:block}
-
-/* ===== Container ===== */
-.container{max-width:900px;margin:0 auto;padding:0 24px}
-@media(max-width:720px){.container{padding:0 16px}}
-
-/* ===== Hero ===== */
+/* Hero */
 .hero{
-  position:relative;
-  padding:60px 0 48px;
   text-align:center;
-  overflow:hidden
+  padding:64px 24px 48px;
+  position:relative;
+  overflow:hidden;
 }
 .hero::after{
   content:'';
   position:absolute;
   inset:0;
-  background:linear-gradient(180deg,rgba(37,99,235,.04) 0%,transparent 100%);
-  pointer-events:none
+  background:radial-gradient(ellipse at 50% -30%,rgba(37,99,235,.08),transparent 60%);
+  pointer-events:none;
 }
 .hero-title{
-  font-size:2.4rem;
+  font-size:clamp(28px,5vw,48px);
   font-weight:800;
-  letter-spacing:-.04em;
-  line-height:1.2;
   background:linear-gradient(120deg,#2563eb,#4f46e5,#7c3aed);
   -webkit-background-clip:text;
-  background-clip:text;
   -webkit-text-fill-color:transparent;
-  margin-bottom:8px
+  background-clip:text;
+  margin-bottom:12px;
+  letter-spacing:-.02em;
 }
 .hero-sub{
-  font-size:1.05rem;
-  color:#52525b;
-  max-width:520px;
-  margin:0 auto 20px
+  font-size:clamp(14px,2.2vw,18px);
+  color:#64748b;
+  font-weight:500;
+  margin-bottom:28px;
 }
-.hero-back{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding:8px 18px;
-  background:#fff;
-  color:#2563eb;
-  font-size:.875rem;
-  font-weight:600;
+.hero-btn{
+  display:inline-block;
+  padding:10px 24px;
+  background:#2563eb;
+  color:#fff;
   text-decoration:none;
-  border-radius:9999px;
-  box-shadow:0 0 0 1px rgba(0,0,0,.06),0 4px 12px -8px rgba(0,0,0,.12);
-  transition:box-shadow .2s,transform .2s;
-  letter-spacing:.01em
+  border-radius:999px;
+  font-size:15px;
+  font-weight:600;
+  transition:background .2s,transform .2s,box-shadow .2s;
+  box-shadow:0 4px 14px rgba(37,99,235,.25);
 }
-.hero-back:hover{
-  box-shadow:0 0 0 1px rgba(37,99,235,.3),0 8px 20px -10px rgba(37,99,235,.25);
-  transform:translateY(-1px)
-}
-@media(max-width:720px){
-  .hero{padding:40px 0 32px}
-  .hero-title{font-size:1.7rem}
-  .hero-sub{font-size:.92rem}
-}
+.hero-btn:hover{background:#1d4ed8;transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.35)}
+.hero-btn:active{transform:translateY(0)}
 
-/* ===== Card ===== */
+/* Container */
+.container{max-width:880px;margin:0 auto;padding:0 24px 64px}
+
+/* Card */
 .card{
   background:#fff;
   border-radius:16px;
   box-shadow:0 0 0 1px rgba(0,0,0,.06),0 8px 24px -12px rgba(0,0,0,.12);
-  margin-bottom:32px;
-  padding:28px;
-  transition:box-shadow .25s,transform .25s
+  overflow:hidden;
+  margin-bottom:40px;
+  transition:transform .25s ease,box-shadow .25s ease;
 }
 .card:hover{
-  transform:translateY(-3px);
-  box-shadow:0 0 0 1px rgba(0,0,0,.06),0 16px 40px -16px rgba(0,0,0,.18)
-}
-@media(max-width:720px){.card{padding:20px;margin-bottom:24px}}
-
-/* ===== Badge (序号徽章) ===== */
-.badge{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:32px;height:32px;
-  border-radius:9999px;
-  background:linear-gradient(120deg,#2563eb,#4f46e5);
-  color:#fff;
-  font-size:.85rem;
-  font-weight:700;
-  flex-shrink:0
+  transform:translateY(-4px);
+  box-shadow:0 0 0 1px rgba(0,0,0,.06),0 16px 40px -16px rgba(0,0,0.16);
 }
 .card-header{
   display:flex;
   align-items:center;
   gap:12px;
-  margin-bottom:16px
+  padding:24px 28px 0;
 }
-.card-header h2{
-  font-size:1.2rem;
+.card-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:32px;
+  height:28px;
+  padding:0 10px;
+  border-radius:999px;
+  background:linear-gradient(120deg,#2563eb,#4f46e5);
+  color:#fff;
+  font-size:13px;
   font-weight:700;
-  color:#1a1a1a;
-  letter-spacing:-.01em
+  letter-spacing:.03em;
+  flex-shrink:0;
 }
-
-/* ===== Image Wrapper ===== */
-.img-wrap{
+.card-title{
+  font-size:20px;
+  font-weight:700;
+  color:#1a1a2e;
+}
+.card-body{padding:20px 28px 24px}
+.card-img-wrap{
+  position:relative;
+  cursor:zoom-in;
   border-radius:12px;
   overflow:hidden;
-  margin-bottom:16px;
-  cursor:pointer;
-  position:relative
+  box-shadow:0 0 0 1px rgba(0,0,0,.06);
+  margin-bottom:18px;
 }
-.img-wrap img{
+.card-img-wrap img{
+  display:block;
   width:100%;
   height:auto;
-  transition:opacity .25s
+  transition:transform .35s ease;
 }
-.img-wrap:hover img{opacity:.92}
-
-/* ===== Bullet List ===== */
-.bullets{
+.card-img-wrap:hover img{transform:scale(1.02)}
+.card-points{
   list-style:none;
-  padding:0
+  padding:0;
 }
-.bullets li{
+.card-points li{
   position:relative;
-  padding-left:18px;
-  margin-bottom:6px;
-  font-size:.92rem;
-  color:#52525b;
-  line-height:1.55
+  padding:5px 0 5px 20px;
+  font-size:14px;
+  color:#475569;
+  line-height:1.65;
 }
-.bullets li::before{
+.card-points li::before{
   content:'';
   position:absolute;
   left:0;
-  top:10px;
-  width:6px;
-  height:6px;
+  top:12px;
+  width:8px;
+  height:8px;
   border-radius:50%;
-  background:#2563eb;
-  opacity:.65
+  background:linear-gradient(120deg,#2563eb,#4f46e5);
+  opacity:.7;
 }
 
-/* ===== Lightbox ===== */
+/* Lightbox */
 .lightbox{
   display:none;
   position:fixed;
-  inset:0;
   z-index:9999;
-  background:rgba(0,0,0,.82);
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
-  justify-content:center;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  backdrop-filter:blur(4px);
   align-items:center;
+  justify-content:center;
   padding:32px;
-  cursor:pointer;
-  animation:lbFade .2s ease
+  animation:fadeIn .2s ease;
 }
-.lightbox.active{display:flex}
-.lightbox img{
-  max-width:94vw;
-  max-height:92vh;
+.lightbox.open{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.lightbox-inner{
+  position:relative;
+  max-width:90vw;
+  max-height:88vh;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 24px 64px rgba(0,0,0,.4);
+  animation:scaleIn .25s ease;
+}
+@keyframes scaleIn{from{transform:scale(.92)}to{transform:scale(1)}}
+.lightbox-inner img{
+  display:block;
+  max-width:90vw;
+  max-height:88vh;
+  width:auto;
+  height:auto;
   object-fit:contain;
-  border-radius:8px;
-  box-shadow:0 20px 60px rgba(0,0,0,.5);
-  cursor:default
+  background:#fff;
 }
 .lightbox-close{
   position:absolute;
-  top:20px;
-  right:28px;
-  width:40px;height:40px;
-  border-radius:50%;
-  background:rgba(255,255,255,.15);
+  top:12px;
+  right:12px;
+  width:36px;
+  height:36px;
   border:none;
+  border-radius:50%;
+  background:rgba(0,0,0,.5);
   color:#fff;
-  font-size:1.4rem;
+  font-size:22px;
   cursor:pointer;
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:background .2s
+  transition:background .2s;
+  line-height:1;
 }
-.lightbox-close:hover{background:rgba(255,255,255,.28)}
-@keyframes lbFade{from{opacity:0}to{opacity:1}}
-@media(max-width:720px){
-  .lightbox{padding:16px}
-  .lightbox img{max-width:98vw;max-height:85vh}
-  .lightbox-close{top:12px;right:16px;width:36px;height:36px;font-size:1.2rem}
-}
+.lightbox-close:hover{background:rgba(0,0,0,.75)}
 
-/* ===== Footer ===== */
+/* Footer */
 .footer{
   text-align:center;
-  padding:40px 0 48px;
-  color:#8b8b94;
-  font-size:.85rem;
+  padding:32px 24px 40px;
+  color:#94a3b8;
+  font-size:14px;
   border-top:1px solid rgba(0,0,0,.04);
-  margin-top:8px
+}
+.footer a{color:#2563eb;text-decoration:none}
+.footer a:hover{text-decoration:underline}
+
+/* Responsive */
+@media(max-width:720px){
+  .container{padding:0 16px 48px}
+  .hero{padding:40px 16px 32px}
+  .card-header{padding:18px 20px 0;flex-wrap:wrap}
+  .card-body{padding:16px 20px 20px}
+  .lightbox{padding:16px}
 }
 </style>
 </head>
 <body>
 
-<!-- ============ HERO ============ -->
-<header class="hero">
-  <div class="container">
-    <h1 class="hero-title">CampusRepair · 项目设计文档</h1>
-    <p class="hero-sub">浙江树人学院 · 人工智能 / 软件项目管理课程作业</p>
-    <a class="hero-back" href="/campusrepair/">← 返回在线 Demo</a>
+<!-- Hero -->
+<section class="hero">
+  <h1 class="hero-title">CampusRepair · 项目设计文档</h1>
+  <p class="hero-sub">浙江树人学院 · 软件工程需求分析与系统设计</p>
+  <a class="hero-btn" href="/campusrepair/">← 返回在线 Demo</a>
+</section>
+
+<!-- Cards -->
+<div class="container">
+
+  <!-- 1. 用例图 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-badge">01</span>
+      <h2 class="card-title">用例图 <span style="font-weight:400;font-size:15px;color:#64748b">(Use Case Diagram)</span></h2>
+    </div>
+    <div class="card-body">
+      <div class="card-img-wrap" onclick="openLightbox(this.querySelector('img').src)">
+        <img src="charts/用例图.png" alt="用例图" loading="lazy">
+      </div>
+      <ul class="card-points">
+        <li>三个角色：学生/教职工、后勤管理员、维修人员，体现权限边界</li>
+        <li>涵盖 11 个用例，覆盖报修全流程核心功能</li>
+        <li>清晰划分各角色职责范围与系统交互边界</li>
+      </ul>
+    </div>
   </div>
-</header>
 
-<!-- ============ MAIN ============ -->
-<main class="container">
-
-  <!-- 卡片 1 —— ER 图 -->
-  <section class="card">
+  <!-- 2. 业务流程图 -->
+  <div class="card">
     <div class="card-header">
-      <span class="badge">1</span>
-      <h2>实体关系图 (ER Diagram)</h2>
+      <span class="card-badge">02</span>
+      <h2 class="card-title">业务流程图 <span style="font-weight:400;font-size:15px;color:#64748b">(Activity Diagram)</span></h2>
     </div>
-    <div class="img-wrap" onclick="openLightbox(this)">
-      <img src="charts/01_ER图_实体关系图.png" alt="实体关系图 — CampusRepair 数据库设计">
+    <div class="card-body">
+      <div class="card-img-wrap" onclick="openLightbox(this.querySelector('img').src)">
+        <img src="charts/业务流程图.png" alt="业务流程图" loading="lazy">
+      </div>
+      <ul class="card-points">
+        <li>报修工单全生命周期：学生提交 → 管理员受理分发 → 维修处理 → 学生确认评价</li>
+        <li>含「信息是否完整」判定分支，确保数据完整性</li>
+        <li>状态流转：待审核 → 已分配 → 处理中 → 已完成 → 已评价</li>
+      </ul>
     </div>
-    <ul class="bullets">
-      <li>4 个核心实体：报修人 / 报修工单 / 维修人员 / 工单时间线</li>
-      <li>主键外键标注完整，体现数据库参照完整性</li>
-      <li>报修人 1:N 工单（提交）、维修人员 1:N 工单（分派）、工单 1:N 时间线（记录）三组关系</li>
-    </ul>
-  </section>
+  </div>
 
-  <!-- 卡片 2 —— 甘特图 -->
-  <section class="card">
+  <!-- 3. 类图 -->
+  <div class="card">
     <div class="card-header">
-      <span class="badge">2</span>
-      <h2>项目进度甘特图 (WBS)</h2>
+      <span class="card-badge">03</span>
+      <h2 class="card-title">核心类图 <span style="font-weight:400;font-size:15px;color:#64748b">(Class Diagram)</span></h2>
     </div>
-    <div class="img-wrap" onclick="openLightbox(this)">
-      <img src="charts/02_甘特图_进度计划.png" alt="项目进度甘特图 — CampusRepair WBS">
+    <div class="card-body">
+      <div class="card-img-wrap" onclick="openLightbox(this.querySelector('img').src)">
+        <img src="charts/类图.png" alt="类图" loading="lazy">
+      </div>
+      <ul class="card-points">
+        <li>5 个核心类：用户、报修工单、维修人员、工单时间线、工单服务</li>
+        <li>工单状态枚举：待审核 / 已分配 / 处理中 / 已完成 / 已评价</li>
+        <li>标注属性、方法及类间关联关系（关联、聚合、依赖）</li>
+      </ul>
     </div>
-    <ul class="bullets">
-      <li>六大阶段：需求分析 → 系统设计 → 编码实现 → 测试 → 部署 → 文档验收</li>
-      <li>三人小组分工，各阶段责任明确</li>
-      <li>三个里程碑：设计冻结 / 功能完成 / 项目交付</li>
-      <li>项目周期约 5.5 周</li>
-    </ul>
-  </section>
+  </div>
 
-  <!-- 卡片 3 —— 数据流图 -->
-  <section class="card">
+  <!-- 4. ER图/数据库设计 -->
+  <div class="card">
     <div class="card-header">
-      <span class="badge">3</span>
-      <h2>数据流图 (DFD)</h2>
+      <span class="card-badge">04</span>
+      <h2 class="card-title">ER 图 / 数据库设计 <span style="font-weight:400;font-size:15px;color:#64748b">(ER Diagram)</span></h2>
     </div>
-    <div class="img-wrap" onclick="openLightbox(this)">
-      <img src="charts/03_数据流图_DFD.png" alt="数据流图 — CampusRepair DFD">
+    <div class="card-body">
+      <div class="card-img-wrap" onclick="openLightbox(this.querySelector('img').src)">
+        <img src="charts/ER图_数据库设计.png" alt="ER图 / 数据库设计" loading="lazy">
+      </div>
+      <ul class="card-points">
+        <li>4 张表：报修人 (reporter)、报修工单 (ticket)、维修人员 (worker)、工单时间线 (timeline)</li>
+        <li>主键外键明确标注，体现数据库参照完整性约束</li>
+        <li>表间 1:N 关系：reporter→ticket、worker→ticket、ticket→timeline</li>
+      </ul>
     </div>
-    <ul class="bullets">
-      <li>3 个外部实体：学生 · 管理员 · 维修人员</li>
-      <li>5 个处理过程：P1 提交报修 / P2 受理分派 / P3 维修处理 / P4 确认评价 / P5 统计分析</li>
-      <li>2 个数据存储：D1 工单库 / D2 人员库</li>
-      <li>采用标准 DFD 符号与数据流标签</li>
-    </ul>
-  </section>
+  </div>
 
-</main>
-
-<!-- ============ LIGHTBOX ============ -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
-  <button class="lightbox-close" onclick="closeLightbox(event)">✕</button>
-  <img id="lightboxImg" src="" alt="放大查看">
 </div>
 
-<!-- ============ FOOTER ============ -->
+<!-- Footer -->
 <footer class="footer">
-  <div class="container">
-    物联网工程231 · 陈宇杰 · 学号 202305311115
-  </div>
+  物联网工程231 · 陈宇杰、金榆浩、苏浚豪 · 学号 202305311115
 </footer>
 
-<!-- ============ JS ============ -->
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" onclick="closeLightbox(event)" aria-label="关闭">&times;</button>
+    <img id="lightbox-img" src="" alt="放大查看">
+  </div>
+</div>
+
 <script>
-function openLightbox(wrap){
-  var img=wrap.querySelector('img');
-  if(!img)return;
-  var lb=document.getElementById('lightbox');
-  var lbImg=document.getElementById('lightboxImg');
-  lbImg.src=img.src;
-  lbImg.alt=img.alt;
-  lb.classList.add('active');
-  document.body.style.overflow='hidden';
+function openLightbox(src){
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
-function closeLightbox(ev){
-  var lb=document.getElementById('lightbox');
-  if(ev.target===lb||ev.target.classList.contains('lightbox-close')||ev.target.tagName==='BUTTON'){
-    lb.classList.remove('active');
-    document.body.style.overflow='';
+function closeLightbox(e){
+  if(!e || e.target === e.currentTarget || e.target.classList.contains('lightbox-close')){
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
   }
 }
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){
-    var lb=document.getElementById('lightbox');
-    if(lb.classList.contains('active')){
-      lb.classList.remove('active');
-      document.body.style.overflow='';
-    }
+  if(e.key === 'Escape'){
+    var lb = document.getElementById('lightbox');
+    if(lb.classList.contains('open')){lb.classList.remove('open');document.body.style.overflow=''}
   }
 });
 </script>
+
 </body>
 </html>
