@@ -384,6 +384,7 @@
 </div>
 <div class="toast" id="toast"></div>
 
+<script src="offline_api.js"></script>
 <script>
 "use strict";
 
@@ -397,16 +398,6 @@ const STATUS = {
   done:{label:'已完成',cls:'done'},
   evaluated:{label:'已评价',cls:'evaluated'}
 };
-const STATUS_KEY = {
-  '待审核':'pending',
-  '已分配':'assigned',
-  '处理中':'processing',
-  '已完成':'done',
-  '已评价':'evaluated'
-};
-function normalizeTicket(ticket) {
-  return {...ticket, status: STATUS[ticket.status] ? ticket.status : (STATUS_KEY[ticket.status] || ticket.status)};
-}
 
 /* ===================== 认证层 ===================== */
 let userName = localStorage.getItem('campus_userName') || '';
@@ -556,7 +547,7 @@ $$('.role-card').forEach(c=>c.addEventListener('click',()=>go(c.dataset.go)));
 async function renderHome() {
   try {
     const res = await apiFetch('tickets');
-    const tickets = (await res.json()).map(normalizeTicket);
+    const tickets = await res.json();
     const total = tickets.length;
     const openCount = tickets.filter(t => t.status==='processing'||t.status==='assigned').length;
     $('#st-total').textContent = total;
@@ -619,7 +610,7 @@ async function renderMine(){
   const box=$('#mineList');
   try {
     const res = await apiFetch('tickets');
-    const tickets = (await res.json()).map(normalizeTicket);
+    const tickets = await res.json();
     if(!tickets.length){box.innerHTML=emptyHTML('🗂️','还没有报修记录，去提交一条吧');return;}
     box.innerHTML = tickets.map(t => ticketHTML(t, {
       detail: true,
@@ -729,7 +720,7 @@ async function renderAdmin(){
   const box=$('#adminList');
   try {
     const res = await apiFetch('tickets');
-    let tickets = (await res.json()).map(normalizeTicket);
+    let tickets = await res.json();
     if (curFilter!=='all') tickets = tickets.filter(t => t.status === curFilter);
     if (!tickets.length) { box.innerHTML = emptyHTML('📭','该状态下暂无工单'); return; }
     // 预加载工人列表用于派单
@@ -774,7 +765,7 @@ async function renderWorker(){
   document.getElementById('workerNameDisplay').textContent = userName || '—';
   try {
     const res = await apiFetch('tickets');
-    const tickets = (await res.json()).map(normalizeTicket);
+    const tickets = await res.json();
     if(!tickets.length){box.innerHTML=emptyHTML('🧰','当前没有分派给你的任务');return;}
     box.innerHTML = tickets.map(t => ticketHTML(t, {detail:true, extra: workerActions(t)})).join('');
   } catch(e) {
@@ -830,7 +821,7 @@ function ticketHTML(t, opt={}){
 window.detail = async function(id) {
   try {
     const res = await apiFetch('tickets/' + id);
-    const t = normalizeTicket(await res.json());
+    const t = await res.json();
     openModal(`
       <button class="close" onclick="closeModal()">✕</button>
       <h2>工单 ${esc(t.id)}</h2>
