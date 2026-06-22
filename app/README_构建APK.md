@@ -68,11 +68,21 @@ build/app/outputs/flutter-apk/app-release.apk
 - 登录态（token）存在 WebView 的 localStorage 里，**关掉重开仍保持登录**（`domStorageEnabled: true` 起的作用）
 - 系统返回键 = 网页后退
 
-## 五、可选美化
+## 五、应用图标 & 启动页（可选美化）
 
-- **换应用图标**：用 `flutter_launcher_icons` 包，把项目的蓝紫渐变 logo 设为图标
-- **换启动图**：`flutter_native_splash` 包做暖白底 + logo 的启动页
-- 需要的话告诉我，我把这两个配置也写好给你
+已写好配置，跑两条命令即可：
+
+```bash
+# 在 app/ 目录下
+flutter pub get
+flutter pub run flutter_launcher_icons     # 生成自适应图标（蓝紫渐变 + 白色扳手）
+flutter pub run flutter_native_splash:create  # 生成启动页（暖白底 + 居中 logo）
+flutter build apk --release
+```
+
+- **图标源图**：`assets/icon.png`（蓝紫渐变圆角 + 白色扳手，1024×1024）
+- **配置文件**：`flutter_launcher_icons.yaml` / `flutter_native_splash.yaml`
+- 效果：桌面图标不再是默认 Flutter 图标，启动时有品牌过渡页
 
 ---
 

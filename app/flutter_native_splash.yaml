@@ -1,0 +1,13 @@
+# flutter_native_splash 配置
+# 启动页：暖白背景 + 居中 logo
+
+flutter_native_splash:
+  color: "#FAFAF7"
+  image: assets/icon.png
+
+  android: true
+  ios: true
+
+  android_12:
+    image: assets/icon.png
+    color: "#FAFAF7"

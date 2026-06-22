@@ -1,0 +1,12 @@
+# flutter_launcher_icons 配置
+# 从 assets/icon.png 自动生成所有分辨率的 Android/iOS 图标
+
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+
+  image_path: "assets/icon.png"
+  adaptive_icon_background: "#2563eb"
+  adaptive_icon_foreground: "assets/icon.png"
+
+  min_sdk_android: 21
