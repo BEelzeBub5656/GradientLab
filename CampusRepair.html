@@ -520,7 +520,7 @@ const $$ = s => document.querySelectorAll(s);
 function fmt(ts){const d=new Date(ts);const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
 function ago(ts){const s=(Date.now()-ts)/1000;if(s<60)return'刚刚';if(s<3600)return Math.floor(s/60)+'分钟前';if(s<86400)return Math.floor(s/3600)+'小时前';return Math.floor(s/86400)+'天前';}
 function pill(st){return `<span class="pill ${STATUS[st]?STATUS[st].cls:'pending'}">${STATUS[st]?STATUS[st].label:st}</span>`;}
-function esc(s){return (s||'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 let toastT;
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2200);}
 function emptyHTML(e,p){return `<div class="empty"><div class="e">${e}</div><p>${p}</p></div>`;}
