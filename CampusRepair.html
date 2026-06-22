@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CampusRepair · 校园智慧报修与后勤工单管理系统</title>
+<style>
+  :root{
+    --paper:#fafaf7;            /* 暖白纸张 */
+    --surface:#ffffff;
+    --ink:#1a1a1a;
+    --ink-soft:#52525b;
+    --ink-faint:#8b8b94;
+    --line:rgba(0,0,0,.06);     /* Vercel shadow-as-border */
+    --line-strong:rgba(0,0,0,.10);
+    --brand:#2563eb;
+    --brand-deep:#4f46e5;
+    --brand-violet:#7c3aed;
+    --grad:linear-gradient(120deg,#2563eb 0%,#4f46e5 45%,#7c3aed 100%);
+    --ok:#16a34a; --ok-bg:#ecfdf3;
+    --warn:#d97706; --warn-bg:#fffbeb;
+    --info:#2563eb; --info-bg:#eff6ff;
+    --proc:#7c3aed; --proc-bg:#f5f3ff;
+    --done:#16a34a; --done-bg:#ecfdf3;
+    --gray:#52525b; --gray-bg:#f4f4f5;
+    --r:16px; --r-sm:10px; --r-pill:9999px;
+    --shadow:0 0 0 1px var(--line), 0 1px 2px rgba(0,0,0,.04), 0 8px 24px -12px rgba(0,0,0,.12);
+    --shadow-hover:0 0 0 1px var(--line-strong), 0 2px 4px rgba(0,0,0,.05), 0 14px 36px -14px rgba(0,0,0,.18);
+    font-family:'Inter','PingFang SC','Microsoft YaHei',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+  .wrap{max-width:1120px;margin:0 auto;padding:24px 20px 80px}
+
+  /* ---------- 顶栏 ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
+  .logo .dot{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:16px;box-shadow:0 4px 12px -2px rgba(79,70,229,.5)}
+  .logo b{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .role-switch{display:flex;gap:4px;background:var(--surface);padding:4px;border-radius:var(--r-pill);box-shadow:var(--shadow)}
+  .role-switch button{border:0;background:transparent;padding:8px 16px;border-radius:var(--r-pill);font-size:13.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:.2s;font-family:inherit}
+  .role-switch button.active{background:var(--grad);color:#fff;box-shadow:0 4px 12px -3px rgba(79,70,229,.55)}
+  .role-switch button:not(.active):hover{background:var(--gray-bg);color:var(--ink)}
+
+  /* ---------- 卡片 ---------- */
+  .card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:22px}
+  .card+.card{margin-top:18px}
+  .hero{padding:34px;position:relative;overflow:hidden}
+  .hero .tag{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.3px;color:var(--brand);background:var(--info-bg);padding:5px 12px;border-radius:var(--r-pill);box-shadow:0 0 0 1px rgba(37,99,235,.12)}
+  .hero h1{margin:16px 0 4px;font-size:34px;font-weight:800;letter-spacing:-.5px;line-height:1.2}
+  .hero h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .hero p{color:var(--ink-soft);font-size:15px;max-width:640px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}
+  .stat{background:var(--paper);border-radius:var(--r-sm);padding:14px 16px;box-shadow:0 0 0 1px var(--line)}
+  .stat .n{font-size:24px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .stat .l{font-size:12.5px;color:var(--ink-faint);margin-top:2px}
+
+  .sec-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .sec-title .bar{width:4px;height:16px;border-radius:2px;background:var(--grad)}
+
+  /* 角色选择卡 */
+  .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .role-card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:22px;cursor:pointer;transition:.22s;text-align:left}
+  .role-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)}
+  .role-card .ico{font-size:30px}
+  .role-card h3{margin:10px 0 4px;font-size:17px}
+  .role-card p{font-size:13px;color:var(--ink-faint)}
+
+  /* 流程 */
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .flow .step{flex:1;min-width:150px;background:var(--paper);border-radius:var(--r-sm);padding:16px;box-shadow:0 0 0 1px var(--line);text-align:center}
+  .flow .step .e{font-size:22px}
+  .flow .step .t{font-weight:600;font-size:14px;margin-top:6px}
+  .flow .step .d{font-size:12px;color:var(--ink-faint);margin-top:2px}
+  .flow .arrow{color:var(--ink-faint);font-size:20px;flex:0 0 auto}
+
+  /* 胶囊 Tab */
+  .tabs{display:inline-flex;gap:4px;background:var(--surface);padding:4px;border-radius:var(--r-pill);box-shadow:var(--shadow);margin-bottom:18px;flex-wrap:wrap}
+  .tabs button{border:0;background:transparent;padding:8px 16px;border-radius:var(--r-pill);font-size:13.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:.2s;font-family:inherit}
+  .tabs button.active{background:var(--grad);color:#fff}
+  .tabs button:not(.active):hover{background:var(--gray-bg);color:var(--ink)}
+
+  /* 表单 */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field.full{grid-column:1/-1}
+  label{font-size:13px;font-weight:600;color:var(--ink-soft)}
+  input,select,textarea{font-family:inherit;font-size:14px;padding:11px 13px;border-radius:var(--r-sm);border:0;background:var(--paper);box-shadow:0 0 0 1px var(--line);color:var(--ink);transition:.18s;width:100%}
+  input:focus,select:focus,textarea:focus{outline:0;box-shadow:0 0 0 2px var(--brand)}
+  textarea{resize:vertical;min-height:90px}
+  .btn{border:0;font-family:inherit;font-size:14px;font-weight:600;padding:11px 22px;border-radius:var(--r-pill);cursor:pointer;transition:.2s}
+  .btn.primary{background:var(--grad);color:#fff;box-shadow:0 6px 16px -6px rgba(79,70,229,.6)}
+  .btn.primary:hover{transform:translateY(-1px);box-shadow:0 10px 22px -8px rgba(79,70,229,.7)}
+  .btn.ghost{background:var(--gray-bg);color:var(--ink)}
+  .btn.ghost:hover{background:#e9e9ec}
+  .btn.sm{padding:7px 14px;font-size:12.5px}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+
+  /* 工单卡 / 列表 */
+  .ticket{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;transition:.2s}
+  .ticket:hover{box-shadow:var(--shadow-hover)}
+  .ticket+.ticket{margin-top:12px}
+  .ticket .head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .ticket .id{font-size:12px;color:var(--ink-faint);font-weight:600;letter-spacing:.3px}
+  .ticket .ttl{font-size:15.5px;font-weight:700;margin-top:2px}
+  .ticket .meta{display:flex;gap:14px;flex-wrap:wrap;color:var(--ink-faint);font-size:12.5px;margin-top:8px}
+  .ticket .meta span{display:inline-flex;align-items:center;gap:4px}
+  .ticket .desc{font-size:13.5px;color:var(--ink-soft);margin-top:10px}
+  .ticket .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+
+  /* pill 状态标签 */
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 11px;border-radius:var(--r-pill);white-space:nowrap}
+  .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .pill.pending{color:var(--warn);background:var(--warn-bg)}
+  .pill.assigned{color:var(--info);background:var(--info-bg)}
+  .pill.processing{color:var(--proc);background:var(--proc-bg)}
+  .pill.done{color:var(--done);background:var(--done-bg)}
+  .pill.evaluated{color:var(--gray);background:var(--gray-bg)}
+  .pill.cat{color:var(--brand-deep);background:#eef2ff}
+  .pill.cat::before{display:none}
+
+  /* 统计看板 */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+  .kpi{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+  .kpi .n{font-size:28px;font-weight:800}
+  .kpi .l{font-size:12.5px;color:var(--ink-faint);margin-top:2px}
+  .kpi.c1 .n{color:var(--warn)} .kpi.c2 .n{color:var(--info)} .kpi.c3 .n{color:var(--proc)} .kpi.c4 .n{color:var(--done)}
+  .chart{display:flex;align-items:flex-end;gap:18px;height:170px;padding:14px 6px 0;border-top:1px solid var(--line);margin-top:6px}
+  .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end}
+  .bar{width:100%;max-width:54px;border-radius:8px 8px 0 0;background:var(--grad);transition:height .6s cubic-bezier(.2,.8,.2,1);min-height:4px;position:relative}
+  .bar b{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:13px;font-weight:700;color:var(--ink)}
+  .bar-wrap .lbl{font-size:12px;color:var(--ink-faint);font-weight:600}
+
+  /* 详情 / 时间线 弹层 */
+  .overlay{position:fixed;inset:0;background:rgba(20,20,25,.42);backdrop-filter:blur(3px);display:none;place-items:center;padding:20px;z-index:50}
+  .overlay.show{display:grid}
+  .modal{background:var(--surface);border-radius:20px;box-shadow:0 30px 80px -20px rgba(0,0,0,.45);width:min(560px,100%);max-height:88vh;overflow:auto;padding:26px}
+  .modal h2{font-size:19px;margin-bottom:2px}
+  .modal .close{float:right;border:0;background:var(--gray-bg);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--ink-soft)}
+  .timeline{margin-top:18px;border-left:2px solid var(--line);padding-left:18px;display:flex;flex-direction:column;gap:16px}
+  .tl-item{position:relative}
+  .tl-item::before{content:"";position:absolute;left:-25px;top:4px;width:11px;height:11px;border-radius:50%;background:var(--grad);box-shadow:0 0 0 3px var(--surface)}
+  .tl-item .tt{font-weight:600;font-size:14px}
+  .tl-item .td{font-size:12px;color:var(--ink-faint);margin-top:1px}
+
+  .empty{text-align:center;padding:40px 20px;color:var(--ink-faint)}
+  .empty .e{font-size:34px}
+  .empty p{margin-top:8px;font-size:14px}
+
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:var(--r-pill);font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:.3s;z-index:99;box-shadow:0 12px 30px -8px rgba(0,0,0,.4)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .view{display:none;animation:fade .35s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .footer{text-align:center;color:var(--ink-faint);font-size:12.5px;margin-top:34px;line-height:1.8}
+
+  @media (max-width:720px){
+    .stats,.kpis{grid-template-columns:repeat(2,1fr)}
+    .roles{grid-template-columns:1fr}
+    .form-grid{grid-template-columns:1fr}
+    .hero h1{font-size:27px}
+    .flow .arrow{transform:rotate(90deg)}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 顶栏 -->
+  <div class="topbar">
+    <div class="logo"><span class="dot">🔧</span> <span>Campus<b>Repair</b></span></div>
+    <div class="role-switch" id="roleSwitch">
+      <button data-role="home" class="active">🏠 首页</button>
+      <button data-role="student">🎓 学生</button>
+      <button data-role="admin">📋 管理员</button>
+      <button data-role="worker">🛠️ 维修人员</button>
+    </div>
+  </div>
+
+  <!-- ============ 首页 ============ -->
+  <section class="view active" id="view-home">
+    <div class="card hero">
+      <span class="tag">浙江树人学院 · 人工智能期末大作业 · Vibe Coding</span>
+      <h1>校园智慧报修<br><span class="g">与后勤工单协同管理系统</span></h1>
+      <p>面向高校宿舍、教室、实验室与公共区域的日常报修场景，覆盖「学生提交 → 管理员受理分派 → 维修处理 → 学生确认评价 → 统计分析」全流程闭环。数据本地持久化，刷新不丢失。</p>
+      <div class="stats" id="homeStats">
+        <div class="stat"><div class="n" id="st-total">0</div><div class="l">累计工单</div></div>
+        <div class="stat"><div class="n">3</div><div class="l">协同角色</div></div>
+        <div class="stat"><div class="n" id="st-open">0</div><div class="l">处理中</div></div>
+        <div class="stat"><div class="n">3</div><div class="l">维修师傅</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title"><span class="bar"></span>选择一个角色进入</div>
+      <div class="roles">
+        <div class="role-card" data-go="student">
+          <div class="ico">🎓</div><h3>学生 / 教职工</h3>
+          <p>提交报修工单、追踪我的报修进度、确认完工并评价</p>
+        </div>
+        <div class="role-card" data-go="admin">
+          <div class="ico">📋</div><h3>后勤管理员</h3>
+          <p>受理审核工单、分派维修师傅、查看统计看板</p>
+        </div>
+        <div class="role-card" data-go="worker">
+          <div class="ico">🛠️</div><h3>维修人员</h3>
+          <p>接收维修任务、推进工单状态、记录处理时间线</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title"><span class="bar"></span>业务流程</div>
+      <div class="flow">
+        <div class="step"><div class="e">📝</div><div class="t">提交报修</div><div class="d">学生填写工单</div></div>
+        <span class="arrow">→</span>
+        <div class="step"><div class="e">🔍</div><div class="t">受理分派</div><div class="d">管理员审核派单</div></div>
+        <span class="arrow">→</span>
+        <div class="step"><div class="e">🔧</div><div class="t">维修处理</div><div class="d">师傅推进状态</div></div>
+        <span class="arrow">→</span>
+        <div class="step"><div class="e">⭐</div><div class="t">确认评价</div><div class="d">学生验收打分</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 学生端 ============ -->
+  <section class="view" id="view-student">
+    <div class="tabs" id="stuTabs">
+      <button data-tab="new" class="active">＋ 提交报修</button>
+      <button data-tab="mine">我的报修</button>
+    </div>
+
+    <div id="stu-new">
+      <div class="card">
+        <div class="sec-title"><span class="bar"></span>填写报修信息</div>
+        <form id="repairForm">
+          <div class="form-grid">
+            <div class="field"><label>报修人姓名</label><input id="f-name" placeholder="如：陈宇杰" required></div>
+            <div class="field"><label>联系方式</label><input id="f-contact" placeholder="手机号 / 微信" required></div>
+            <div class="field"><label>故障类型</label>
+              <select id="f-cat" required>
+                <option value="">请选择…</option>
+                <option>水电故障</option><option>网络故障</option><option>家具损坏</option>
+                <option>门窗锁具</option><option>空调暖通</option><option>其他</option>
+              </select>
+            </div>
+            <div class="field"><label>报修位置</label><input id="f-loc" placeholder="如：3号宿舍楼 412室" required></div>
+            <div class="field full"><label>故障描述</label><textarea id="f-desc" placeholder="请详细描述故障现象，便于师傅快速处理…" required></textarea></div>
+          </div>
+          <div style="margin-top:18px;display:flex;gap:10px">
+            <button type="submit" class="btn primary">提交报修工单</button>
+            <button type="reset" class="btn ghost">清空</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="stu-mine" style="display:none">
+      <div class="sec-title"><span class="bar"></span>我的报修工单</div>
+      <div id="mineList"></div>
+    </div>
+  </section>
+
+  <!-- ============ 管理员端 ============ -->
+  <section class="view" id="view-admin">
+    <div class="tabs" id="adminTabs">
+      <button data-tab="board" class="active">📊 统计看板</button>
+      <button data-tab="list">工单管理</button>
+    </div>
+
+    <div id="adm-board">
+      <div class="kpis">
+        <div class="kpi c1"><div class="n" id="k-pending">0</div><div class="l">待审核</div></div>
+        <div class="kpi c2"><div class="n" id="k-assigned">0</div><div class="l">已分配</div></div>
+        <div class="kpi c3"><div class="n" id="k-processing">0</div><div class="l">处理中</div></div>
+        <div class="kpi c4"><div class="n" id="k-done">0</div><div class="l">已完成</div></div>
+      </div>
+      <div class="card">
+        <div class="sec-title"><span class="bar"></span>各状态工单分布</div>
+        <div class="chart" id="chart"></div>
+      </div>
+    </div>
+
+    <div id="adm-list" style="display:none">
+      <div class="tabs" id="filterTabs" style="box-shadow:none;background:transparent;padding:0;gap:6px">
+        <button data-f="all" class="active">全部</button>
+        <button data-f="pending">待审核</button>
+        <button data-f="assigned">已分配</button>
+        <button data-f="processing">处理中</button>
+        <button data-f="done">已完成</button>
+        <button data-f="evaluated">已评价</button>
+      </div>
+      <div id="adminList"></div>
+    </div>
+  </section>
+
+  <!-- ============ 维修人员端 ============ -->
+  <section class="view" id="view-worker">
+    <div class="card" style="margin-bottom:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <label style="font-weight:700">当前师傅：</label>
+      <select id="workerSel" style="max-width:240px"></select>
+      <span class="pill cat" id="workerSkill"></span>
+    </div>
+    <div class="sec-title"><span class="bar"></span>分派给我的维修任务</div>
+    <div id="workerList"></div>
+  </section>
+
+  <div class="footer">
+    CampusRepair · 校园智慧报修与后勤工单管理系统<br>
+    物联网工程 231 · 陈宇杰 · 学号 202305311115 · 人工智能期末大作业（Vibe Coding）
+  </div>
+</div>
+
+<!-- 详情弹层 -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const KEY='campusrepair.v1';
+const STATUS={
+  pending:{label:'待审核',cls:'pending'},
+  assigned:{label:'已分配',cls:'assigned'},
+  processing:{label:'处理中',cls:'processing'},
+  done:{label:'已完成',cls:'done'},
+  evaluated:{label:'已评价',cls:'evaluated'}
+};
+const WORKERS=[
+  {id:'w1',name:'王师傅',skill:'水电维修'},
+  {id:'w2',name:'李师傅',skill:'网络弱电'},
+  {id:'w3',name:'张师傅',skill:'综合维修'}
+];
+const now=Date.now();
+const H=3600*1000, D=24*H;
+function seed(){
+  let n=240501;
+  const t=(cat,loc,desc,name,status,worker,off,tl,rating)=>({
+    id:'WX'+(n++), category:cat, location:loc, desc, reporter:name, contact:'138****'+(1000+Math.floor(Math.random()*8999)),
+    status, worker:worker||null, createdAt:now-off, rating:rating||null,
+    timeline: tl
+  });
+  return [
+    t('水电故障','3号宿舍楼 412室','卫生间水龙头持续漏水，关不紧，地面积水。','陈宇杰','evaluated','w1',6*D,
+      [['提交报修',6*D],['管理员受理，分派 王师傅',6*D-2*H],['王师傅已接单，处理中',5*D],['维修完成：更换密封圈',4*D-3*H],['学生确认并评价 ⭐⭐⭐⭐⭐',4*D-2*H]],5),
+    t('网络故障','图书馆 3楼自习区','靠窗一排座位 WiFi 信号极弱，无法连接校园网。','李雯','done','w2',3*D,
+      [['提交报修',3*D],['管理员受理，分派 李师傅',3*D-1*H],['李师傅处理中：排查AP',2*D],['维修完成：重启并加装AP',1*D]]),
+    t('空调暖通','教学楼 B-205','空调制冷不工作，出风为常温，影响上课。','王浩','processing','w3',2*D,
+      [['提交报修',2*D],['管理员受理，分派 张师傅',2*D-1*H],['张师傅已接单，处理中：检查制冷剂',1*D]]),
+    t('家具损坏','5号宿舍楼 308室','书桌抽屉滑轨脱落，无法正常开合。','刘洋','assigned','w3',1*D+6*H,
+      [['提交报修',1*D+6*H],['管理员受理，分派 张师傅',1*D]]),
+    t('门窗锁具','2号宿舍楼 521室','房门门锁卡顿，钥匙难以转动，存在安全隐患。','赵敏','assigned','w1',1*D+2*H,
+      [['提交报修',1*D+2*H],['管理员受理，分派 王师傅',1*D-2*H]]),
+    t('水电故障','实验楼 A-110','插座面板烧黑无电，疑似短路，已断电。','孙强','pending','',8*H,
+      [['提交报修',8*H]]),
+    t('网络故障','7号宿舍楼 215室','网线接口松动，台式机无法上网。','周婷','pending','',4*H,
+      [['提交报修',4*H]]),
+    t('其他','操场看台 东侧','看台座椅有破损松动，需检修加固。','吴迪','pending','',1*H,
+      [['提交报修',1*H]])
+  ].map(x=>({...x, timeline:x.timeline.map(([text,off])=>({text,time:now-off}))}));
+}
+
+let DB = load();
+function load(){
+  try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d&&d.tickets) return d; }catch(e){}
+  const init={tickets:seed()}; localStorage.setItem(KEY,JSON.stringify(init)); return init;
+}
+function save(){ localStorage.setItem(KEY,JSON.stringify(DB)); }
+let curWorker=WORKERS[0].id;
+
+/* ---------- 工具 ---------- */
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+function fmt(ts){const d=new Date(ts);const p=n=>String(n).padStart(2,'0');return `${d.getMonth()+1}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
+function ago(ts){const s=(Date.now()-ts)/1000;if(s<60)return'刚刚';if(s<3600)return Math.floor(s/60)+'分钟前';if(s<86400)return Math.floor(s/3600)+'小时前';return Math.floor(s/86400)+'天前';}
+function workerName(id){const w=WORKERS.find(w=>w.id===id);return w?w.name:'未分派';}
+function pill(st){return `<span class="pill ${STATUS[st].cls}">${STATUS[st].label}</span>`;}
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+let toastT;
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2200);}
+
+/* ---------- 路由 ---------- */
+function go(role){
+  $$('.view').forEach(v=>v.classList.remove('active'));
+  $('#view-'+role).classList.add('active');
+  $$('#roleSwitch button').forEach(b=>b.classList.toggle('active',b.dataset.role===role));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(role==='home')renderHome();
+  if(role==='student')renderMine();
+  if(role==='admin'){renderBoard();renderAdmin();}
+  if(role==='worker')renderWorker();
+}
+$('#roleSwitch').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.role);});
+$$('.role-card').forEach(c=>c.addEventListener('click',()=>go(c.dataset.go)));
+
+/* ---------- 首页 ---------- */
+function renderHome(){
+  $('#st-total').textContent=DB.tickets.length;
+  $('#st-open').textContent=DB.tickets.filter(t=>t.status==='processing'||t.status==='assigned').length;
+}
+
+/* ---------- 学生端 ---------- */
+$('#stuTabs').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  $$('#stuTabs button').forEach(x=>x.classList.toggle('active',x===b));
+  $('#stu-new').style.display=b.dataset.tab==='new'?'block':'none';
+  $('#stu-mine').style.display=b.dataset.tab==='mine'?'block':'none';
+  if(b.dataset.tab==='mine')renderMine();
+});
+$('#repairForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const t={
+    id:'WX'+Math.floor(240600+Math.random()*9000),
+    category:$('#f-cat').value, location:$('#f-loc').value.trim(),
+    desc:$('#f-desc').value.trim(), reporter:$('#f-name').value.trim(),
+    contact:$('#f-contact').value.trim(), status:'pending', worker:null,
+    createdAt:Date.now(), rating:null,
+    timeline:[{text:'提交报修',time:Date.now()}]
+  };
+  DB.tickets.unshift(t); save();
+  e.target.reset();
+  toast('✅ 报修已提交，工单号 '+t.id);
+  $$('#stuTabs button')[1].click();
+});
+function renderMine(){
+  const mine=DB.tickets;
+  const box=$('#mineList');
+  if(!mine.length){box.innerHTML=emptyHTML('🗂️','还没有报修记录，去提交一条吧');return;}
+  box.innerHTML=mine.map(t=>ticketHTML(t,{
+    detail:true,
+    extra: t.status==='done' ? `<button class="btn primary sm" onclick="rate('${t.id}')">确认完工并评价</button>`
+         : t.status==='evaluated' ? `<span class="pill evaluated">已评价 ${'⭐'.repeat(t.rating||0)}</span>` : ''
+  })).join('');
+}
+window.rate=function(id){
+  const t=DB.tickets.find(x=>x.id===id);if(!t)return;
+  openModal(`
+    <button class="close" onclick="closeModal()">✕</button>
+    <h2>确认完工并评价</h2>
+    <p style="color:var(--ink-soft);font-size:13.5px">工单 ${t.id} · ${esc(t.category)}</p>
+    <div style="font-size:30px;margin:20px 0;text-align:center" id="stars">
+      ${[1,2,3,4,5].map(n=>`<span data-n="${n}" style="cursor:pointer">☆</span>`).join('')}
+    </div>
+    <div style="text-align:center"><button class="btn primary" id="rateOk" disabled>提交评价</button></div>
+  `);
+  let chosen=0;
+  const stars=$$('#stars span');
+  stars.forEach(s=>{
+    s.onmouseenter=()=>paint(+s.dataset.n);
+    s.onclick=()=>{chosen=+s.dataset.n;paint(chosen);$('#rateOk').disabled=false;};
+  });
+  $('#stars').onmouseleave=()=>paint(chosen);
+  function paint(n){stars.forEach(s=>s.textContent=(+s.dataset.n<=n)?'⭐':'☆');}
+  $('#rateOk').onclick=()=>{
+    t.status='evaluated';t.rating=chosen;
+    t.timeline.push({text:`学生确认完工并评价 ${'⭐'.repeat(chosen)}`,time:Date.now()});
+    save();closeModal();toast('感谢评价！工单已闭环');renderMine();
+  };
+};
+
+/* ---------- 管理员端 ---------- */
+$('#adminTabs').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  $$('#adminTabs button').forEach(x=>x.classList.toggle('active',x===b));
+  $('#adm-board').style.display=b.dataset.tab==='board'?'block':'none';
+  $('#adm-list').style.display=b.dataset.tab==='list'?'block':'none';
+  if(b.dataset.tab==='board')renderBoard();else renderAdmin();
+});
+let curFilter='all';
+$('#filterTabs').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  $$('#filterTabs button').forEach(x=>x.classList.toggle('active',x===b));
+  curFilter=b.dataset.f;renderAdmin();
+});
+function renderBoard(){
+  const c={pending:0,assigned:0,processing:0,done:0,evaluated:0};
+  DB.tickets.forEach(t=>c[t.status]++);
+  $('#k-pending').textContent=c.pending;
+  $('#k-assigned').textContent=c.assigned;
+  $('#k-processing').textContent=c.processing;
+  $('#k-done').textContent=c.done+c.evaluated;
+  const data=[['待审核',c.pending],['已分配',c.assigned],['处理中',c.processing],['已完成',c.done],['已评价',c.evaluated]];
+  const max=Math.max(1,...data.map(d=>d[1]));
+  $('#chart').innerHTML=data.map(([l,v])=>`
+    <div class="bar-wrap">
+      <div class="bar" style="height:0" data-h="${Math.round(v/max*130)+4}"><b>${v}</b></div>
+      <div class="lbl">${l}</div>
+    </div>`).join('');
+  requestAnimationFrame(()=>$$('#chart .bar').forEach(b=>b.style.height=b.dataset.h+'px'));
+}
+function renderAdmin(){
+  let list=DB.tickets;
+  if(curFilter!=='all')list=list.filter(t=>t.status===curFilter);
+  const box=$('#adminList');
+  if(!list.length){box.innerHTML=emptyHTML('📭','该状态下暂无工单');return;}
+  box.innerHTML=list.map(t=>ticketHTML(t,{detail:true,extra:adminActions(t)})).join('');
+}
+function adminActions(t){
+  if(t.status==='pending'){
+    return `<select class="assignSel" data-id="${t.id}" style="max-width:170px">
+      <option value="">选择维修师傅…</option>
+      ${WORKERS.map(w=>`<option value="${w.id}">${w.name}（${w.skill}）</option>`).join('')}
+    </select>
+    <button class="btn primary sm" onclick="assign('${t.id}')">受理并分派</button>`;
+  }
+  return `<span class="pill cat">负责师傅：${workerName(t.worker)}</span>`;
+}
+window.assign=function(id){
+  const sel=document.querySelector(`.assignSel[data-id="${id}"]`);
+  const wid=sel.value;
+  if(!wid){toast('请先选择维修师傅');return;}
+  const t=DB.tickets.find(x=>x.id===id);
+  t.status='assigned';t.worker=wid;
+  t.timeline.push({text:`管理员受理，分派 ${workerName(wid)}`,time:Date.now()});
+  save();toast('已分派给 '+workerName(wid));renderAdmin();
+};
+
+/* ---------- 维修人员端 ---------- */
+function initWorkerSel(){
+  $('#workerSel').innerHTML=WORKERS.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
+  $('#workerSel').value=curWorker;
+  updWorkerSkill();
+}
+function updWorkerSkill(){const w=WORKERS.find(w=>w.id===curWorker);$('#workerSkill').textContent='技能：'+w.skill;}
+$('#workerSel').addEventListener('change',e=>{curWorker=e.target.value;updWorkerSkill();renderWorker();});
+function renderWorker(){
+  updWorkerSkill();
+  const list=DB.tickets.filter(t=>t.worker===curWorker && t.status!=='pending');
+  const box=$('#workerList');
+  if(!list.length){box.innerHTML=emptyHTML('🧰','当前没有分派给你的任务');return;}
+  box.innerHTML=list.map(t=>ticketHTML(t,{detail:true,extra:workerActions(t)})).join('');
+}
+function workerActions(t){
+  if(t.status==='assigned')return `<button class="btn primary sm" onclick="advance('${t.id}','processing')">开始处理</button>`;
+  if(t.status==='processing')return `<button class="btn primary sm" onclick="advance('${t.id}','done')">标记完成</button>`;
+  return `<span class="pill ${STATUS[t.status].cls}">${STATUS[t.status].label}</span>`;
+}
+window.advance=function(id,to){
+  const t=DB.tickets.find(x=>x.id===id);
+  t.status=to;
+  t.timeline.push({text: to==='processing'?`${workerName(t.worker)} 已接单，开始处理`:`${workerName(t.worker)} 维修完成，待学生确认`, time:Date.now()});
+  save();toast(to==='processing'?'已开始处理':'已标记完成');renderWorker();
+};
+
+/* ---------- 通用渲染 ---------- */
+function ticketHTML(t,opt={}){
+  return `<div class="ticket">
+    <div class="head">
+      <div>
+        <div class="id">${t.id}</div>
+        <div class="ttl">${esc(t.location)}</div>
+      </div>
+      ${pill(t.status)}
+    </div>
+    <div class="meta">
+      <span><span class="pill cat">${esc(t.category)}</span></span>
+      <span>👤 ${esc(t.reporter)}</span>
+      <span>📞 ${esc(t.contact)}</span>
+      <span>🕒 ${ago(t.createdAt)}</span>
+    </div>
+    <div class="desc">${esc(t.desc)}</div>
+    <div class="actions">
+      ${opt.detail?`<button class="btn ghost sm" onclick="detail('${t.id}')">查看时间线</button>`:''}
+      ${opt.extra||''}
+    </div>
+  </div>`;
+}
+window.detail=function(id){
+  const t=DB.tickets.find(x=>x.id===id);if(!t)return;
+  openModal(`
+    <button class="close" onclick="closeModal()">✕</button>
+    <h2>工单 ${t.id}</h2>
+    <p style="color:var(--ink-soft);font-size:13.5px">${esc(t.location)} · ${esc(t.category)} · ${pill(t.status)}</p>
+    <p style="margin-top:12px;font-size:14px;color:var(--ink-soft)">${esc(t.desc)}</p>
+    <div style="margin-top:6px;font-size:12.5px;color:var(--ink-faint)">报修人 ${esc(t.reporter)} · ${esc(t.contact)} · 负责师傅 ${workerName(t.worker)}</div>
+    <div class="timeline">
+      ${t.timeline.map(e=>`<div class="tl-item"><div class="tt">${esc(e.text)}</div><div class="td">${fmt(e.time)}</div></div>`).join('')}
+    </div>
+  `);
+};
+function emptyHTML(e,p){return `<div class="empty"><div class="e">${e}</div><p>${p}</p></div>`;}
+function openModal(html){$('#modal').innerHTML=html;$('#overlay').classList.add('show');}
+window.closeModal=function(){$('#overlay').classList.remove('show');};
+$('#overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* ---------- 启动 ---------- */
+initWorkerSel();
+renderHome();
+</script>
+</body>
+</html>
