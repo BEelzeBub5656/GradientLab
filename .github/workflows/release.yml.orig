@@ -1,0 +1,29 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package project
+        run: |
+          zip -r gradientlab.zip . -x ".git/*" ".github/*"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: "Release v${{ github.run_number }}"
+          body: |
+            自动构建于 ${{ github.event.head_commit.message || '手动触发' }}
+
+            📦 下载 gradientlab.zip 解压后即可使用，含 GradientLab / VoidJack / CampusRepair 三个 HTML 项目。
+          files: gradientlab.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
